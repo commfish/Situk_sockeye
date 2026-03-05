@@ -1,0 +1,25 @@
+model
+{
+    for (y in 1:nyrs) {
+        R[y] ~ dlnorm(mu[y], Tau)
+        fit[y] <- log(S[y]) + lnalpha - (beta * S[y])
+        e[y] <- log(R[y]) - fit[y]
+    }
+    mu[1] <- fit[1] + phi * e0
+    cw[1] ~ dnorm(0.00000E+00, tauw)
+    for (y in 2:nyrs) {
+        cw[y] ~ dnorm(cw[y - 1], tauw)
+        mu[y] <- fit[y] + phi * e[y - 1]
+    }
+    lnalpha ~ dunif(0.00000E+00, 10)
+    beta ~ dunif(0.00000E+00, 10)
+    sigma ~ dunif(0.00000E+00, 2)
+    sigmaw ~ dunif(0.00000E+00, 2)
+    phi ~ dnorm(0.00000E+00, 5)  T(-1, 1)
+    e0 ~ dnorm(0.00000E+00, 25)
+    Tau <- 1/(sigma * sigma)
+    tauw <- 1/(sigmaw * sigmaw)
+    for (y in 1:nyrs) {
+        lnalphai[y] <- lnalpha + cw[y]
+    }
+}
