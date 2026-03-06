@@ -33,11 +33,10 @@ package.use <- "rjags"
 jags.settings <- "test"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
-source("code/model_source.R") 
+source("code/model_source2.R") 
 print(jag.model.SR)
-model_file_loc=paste("code/","Situk_sockeye.txt", sep="")
-write.model(jag.model.SR, model_file_loc)
-
+model_file_loc = paste("code/","Situk_sockeye.txt", sep="")
+write.model(jag_model_SR, model_file_loc)
 
 
 # load custom functions
