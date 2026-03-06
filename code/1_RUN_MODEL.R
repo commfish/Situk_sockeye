@@ -8,8 +8,6 @@ library(coda)
 library(tidyverse)
 library(R2jags)
 library(rjags)
-library(runjags)
-library(R2OpenBUGS)
 library(gsl)
 library(tibble)
 library(dplyr)
@@ -23,6 +21,7 @@ library("devtools")
 devtools::install_github("commfish/fngr")
 library(fngr)
 library(extrafont)
+library(runjags)
 
 # STEP 1: CHOOSE SETTINGS----
 
@@ -32,12 +31,6 @@ out.label <-  "base_case"  # label to be used for the output folder (and for sce
 package.use <- "rjags"  
 jags.settings <- "test"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
-
-source("code/model_source2.R") 
-print(jag.model.SR)
-model_file_loc = paste("code/","Situk_sockeye.txt", sep="")
-write.model(jag_model_SR, model_file_loc)
-
 
 # load custom functions
 source("code/functions.R")
@@ -81,7 +74,12 @@ sw.randomseed <- 2540
 if(package.use == "rjags" & sensitivity.analysis == 0){
   parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c")
   
-  jmod <- rjags::jags.model(file='code/Situk_sockeye.txt', data = dat, n.chains = 3, inits = inits, n.adapt = n.adapt.use) 
+  jmod <- rjags::jags.model(
+    file='code/Situk_sockeye.txt', 
+    data = dat, n.chains = 3, 
+    inits = inits, 
+    n.adapt = n.adapt.use) 
+  
   stats::update(jmod, n.iter = n.iter.use, by = by.use, progress.bar = 'text', DIC=T, n.burnin = n.burnin.use) # this modifies the original object, function returns NULL
   post <- rjags::coda.samples(jmod, parameters, n.iter = n.iter.use, thin = thin.use, n.burnin = n.burnin.use)
   
