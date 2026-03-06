@@ -21,7 +21,7 @@ jag.model.SR = function(){
   Tau <- 1/(sigma*sigma)
   tauw <- 1/(sigmaw*sigmaw)	
   alpha <- exp(lnalpha)
-  lnalpha.c <-lnalpha+0.5*(sigma^2)/(1-phi^2) # Calculate Mean R adjustment    
+  lnalpha.c <-lnalpha+0.5*(sigma^2)/(1-phi^2) # Calculate Mean R adjustment     [determine if correct]
   alpha.c <-exp(lnalpha.c)
   }
 
