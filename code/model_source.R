@@ -7,10 +7,8 @@ jag.model.SR = function(){
     e[y] <- log(R[y]) - fit[y]
   }
     
-  mu[1] <-  fit[1] + phi * e0;
-  cw[1]  ~ dnorm(0,tauw)
+  mu[1] <-  fit[1] + phi*e0
   for(y in 2:nyrs){	   
-    cw[y] ~  dnorm(cw[y-1],tauw)
     mu[y] <- fit[y] + phi*e[y-1]
   }
   #   Define Priors
@@ -22,10 +20,8 @@ jag.model.SR = function(){
   e0 ~ dnorm(0,25) 
   Tau <- 1/(sigma*sigma)
   tauw <- 1/(sigmaw*sigmaw)	
-  
-  # Extract time-varying alpha
-  for(y in 1:nyrs){
-    lnalphai[y] <- lnalpha+cw[y] 
+  alpha <- exp(lnalpha)
+  lnalpha.c <-lnalpha+0.5*(sigma^2)/(1-phi^2) # Calculate Mean R adjustment    
+  alpha.c <-exp(lnalpha.c)
   }
-}
 

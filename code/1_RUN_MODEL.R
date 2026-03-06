@@ -11,32 +11,45 @@ library(rjags)
 library(runjags)
 library(R2OpenBUGS)
 library(gsl)
+library(tibble)
+library(dplyr)
+library(tidyr)
 library(stringr)
-library(arm)
-library(lmtest)
 library(gdata)
+library(ggplot2)
+library(scales)
 library(cowplot)
+library("devtools")
+devtools::install_github("commfish/fngr")
+library(fngr)
+library(extrafont)
 
 # STEP 1: CHOOSE SETTINGS----
 
 # if test runs then do sensitivity tests with explore, and final run with full
 # "explore" version takes ~10min with the current settings.
-out.label <-  "rjags_Full_BaseCase" 
+out.label <-  "base_case"  # label to be used for the output folder (and for scenario comparisons)
 package.use <- "rjags"  #"rjags"  or "R2jags"
-jags.settings <- "full"  # "test" or "explore" or full" 
+jags.settings <- "test"  # "test" or "explore" or full" 
+sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
 source("code/model_source.R") 
 print(jag.model.SR)
 model_file_loc = paste("code/","Situk_sockeye.txt", sep="")
 write.model(jag.model.SR, model_file_loc)
 
-# define the parameters (nodes) of interest (pars to be tracked in the MCMC)
-parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw")
+# load custom functions
+source("code/functions.R")
 
 # create output folder for model results
 out.path <- paste0("output/", out.label)
 if(!exists(out.path)){dir.create(out.path)}
 
+# create output folder for model results
+out.path <- paste0("output/", out.label)
+if(!exists(out.path)){dir.create(out.path)}
+
+# choices of model runs
 if(jags.settings == "test"){
   n.adapt.use <- 100 ; n.iter.use <- 500;  n.burnin.use <- 100;   thin.use = 10
   by.use <- 10 # this is just for the progress bar
@@ -48,81 +61,38 @@ if(jags.settings == "explore"){
 }
 
 if(jags.settings == "full"){
-  n.adapt.use <- 10000  ; n.iter.use <- 4000000    #1,000,000 per chain; 3 chains; thin by 1000
-  n.burnin.use <- 2000000  
+  n.adapt.use <- 10000  ; n.iter.use <- 1000000    #1,000,000 per chain; 3 chains; thin by 1000
+  n.burnin.use <- 100000  # consider increasing this?
   thin.use = 1000; by.use <- 1000 # this is just for the progress bar 
 }
 
 # STEP 2: READ IN DATA, MODEL, AND INITIAL VALUES----
+# generates the object "dat"
 source("code/model_data.R")
 
-# generate initial values
+# generates initial values
 source("code/model_inits.R")
 
 # STEP 3: RUN THE MODEL AND PROCESS THE OUTPUT----
-# 2 options: rjags or R2jags
-
-# This step does the actual MCMC sampling. All subsequent steps
-# should just extract from "post" without rerunning the model
-
-# start the timer
-# R2jags
+# rjags
 start.jags <- proc.time()
-if(package.use == "R2jags"){ # new version
-  r2jags.out <- R2jags::jags(data = dat , inits = inits, 
-                             parameters.to.save = parameters, model.file = jag.model.SR,
-                             n.chains = 3, 
-                             n.iter = n.iter.use + n.burnin.use ,  
-                             # NOTE: R2jags uses n.iter for the TOTAL Samples, and the first n.burnin are discarded)
-                             # rjags below does the n.burnin samples first, then n.iter samples to keep
-                             n.burnin = n.burnin.use, 
-                             n.thin = thin.use, DIC = T)
-  end.jags <- proc.time()   # store time for MCMC
-  mcmc.samples <- r2jags.out$BUGSoutput$sims.matrix
-  mcmc.summary <- r2jags.out$BUGSoutput$summary 
+sw.randomseed <- 2540
+if(package.use == "rjags" & sensitivity.analysis == 0){
+  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c")
   
-  # these are the same as the ones produced below
-  write.csv(mcmc.samples[,c("beta","lnalpha")], file= paste0(out.path,"/coda.csv") ,row.names=FALSE)    # writes csv file
-  write.csv(mcmc.summary, file= paste0(out.path,"/statsquants.csv"))    
-  
-  # this one is the same as coda.csv, except with all params (~40MB) 
-  # - > not tracked in github
-  write.csv(mcmc.samples, file= paste0(out.path,"/coda_allpars.csv") ,row.names=FALSE)    # writes csv file
-  
-  conv.pars <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw")
-  
-  conv.details <- checkConvergence(mcmc.out = r2jags.out, vars.check = conv.pars)
-  
-  write.csv(conv.details,file=paste0(out.path,"/ConvergenceDetails_R2Jags.csv"), row.names=FALSE)
-  
-  # for now, call it converged if gelman rubin and geweke are below critical values 
-  # for all the conv.pars (the acf handling is finicky)
-  # Note: converged = NOT flagged
-  conv.check <- !conv.details$Flag[conv.details$Check == "all.gelman.rubin"] & 
-    !conv.details$Flag[conv.details$Check == "all.geweke"]
-  
-  if(conv.check){print("The R2jags model run DID CONVERGE for all the key variables!")}
-  if(!conv.check){print("The R2jags model run DID NOT CONVERGE for all the key variables!")}
-}
-
-#rjags
-if(package.use == "rjags"){
-  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw")
-  jmod <- rjags::jags.model(file='code/Situk_sockeye.txt', data=dat, n.chains=3, inits=inits, n.adapt=n.adapt.use) 
-  stats::update(jmod, n.iter=n.iter.use, by=by.use, progress.bar='text', DIC=T, n.burnin=n.burnin.use) # this modifies the original object, function returns NULL
-  post <- rjags::coda.samples(jmod, parameters, n.iter=n.iter.use, thin=thin.use, n.burnin=n.burnin.use)
+  jmod <- rjags::jags.model(file='code/Situk_sockeye.txt', data = dat, n.chains = 3, inits = inits, n.adapt = n.adapt.use) 
+  stats::update(jmod, n.iter = n.iter.use, by = by.use, progress.bar = 'text', DIC=T, n.burnin = n.burnin.use) # this modifies the original object, function returns NULL
+  post <- rjags::coda.samples(jmod, parameters, n.iter = n.iter.use, thin = thin.use, n.burnin = n.burnin.use)
   
   end.jags <- proc.time()   # store time for MCMC
   post.arr <- as.array(post) # convert to an accessible obj
   
-  source("code/2_GENERATE_OUTPUTS.R")
+  # run the script that generates all the outputs 
+  #source("state_space_model/2023_analysis/recommendations_added/code/2_GENERATE_OUTPUTS.R")
+  end.output  <- proc.time() 
+  print("Jags took")
+  print(end.jags - start.jags)
+  print("Output Processing took")
+  print(end.output - end.jags)
 }
-end.output  <- proc.time() 
-
-print("Jags took")
-print(end.jags - start.jags)
-print("Output Processing took")
-print(end.output - end.jags)
-
-
 
