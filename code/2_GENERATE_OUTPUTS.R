@@ -154,8 +154,8 @@ coda3 %>%
 coda<-rbind(coda1,coda2,coda3)
 write.csv(coda, file= paste0(out.path,"/coda.csv") ,row.names=FALSE)  
 coda %>% 
-  mutate(Smsy_lambert.c = (1-lambert_W0(exp(1-lnalpha.c)))/beta,
-         Smsy_lambert = (1-lambert_W0(exp(1-lnalpha)))/beta,
+  mutate(Smsy_lambert.c = (1-lambert_W0(exp(1-lnalpha.c)))/beta, # mean recruitment
+         Smsy_lambert = (1-lambert_W0(exp(1-lnalpha)))/beta, # median recruitment
          Umsy_lambert = (1-lambert_W0(exp(1-lnalpha.c))),
          Rmsy = Smsy_lambert*exp(lnalpha-beta*Smsy_lambert),
          MSY = Rmsy-Smsy_lambert)  %>%
@@ -240,26 +240,26 @@ cowplot::plot_grid(plot1,plot2,  align = "v", nrow = 3, ncol=1)
 ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 
 #trace and density plots----
-parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha")
-png("output/base_case/density_other.png",res=500, width=8, height=9, units ="in")
-denplot(post, parms = c(parameters), style="plain", greek=TRUE, col="gray30", collapse =T)
-dev.off()
-dev.off()
-
-parameters <- c('S')
-pdf("output/base_case/density2.pdf",height=10, width=8,onefile=F)
-denplot(post, parms = c(parameters))
-dev.off()
-pdf("output/base_case/trace2.pdf",height=10, width=8,onefile=F)
-traplot(post, parms = c(parameters))
-dev.off()
-parameters <- c('R')
-pdf("output/base_case/density3.pdf",height=10, width=8,onefile=F)
-denplot(post, parms = c(parameters))
-dev.off()
-pdf("output/base_case/trace3.pdf",height=10, width=8,onefile=F)
-traplot(post, parms = c(parameters))
-dev.off()
+# parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha")
+# png("output/base_case/density_other.png",res=500, width=8, height=9, units ="in")
+# denplot(post, parms = c(parameters), style="plain", greek=TRUE, col="gray30", collapse =T)
+# dev.off()
+# dev.off()
+# 
+# parameters <- c('S')
+# pdf("output/base_case/density2.pdf",height=10, width=8,onefile=F)
+# denplot(post, parms = c(parameters))
+# dev.off()
+# pdf("output/base_case/trace2.pdf",height=10, width=8,onefile=F)
+# traplot(post, parms = c(parameters))
+# dev.off()
+# parameters <- c('R')
+# pdf("output/base_case/density3.pdf",height=10, width=8,onefile=F)
+# denplot(post, parms = c(parameters))
+# dev.off()
+# pdf("output/base_case/trace3.pdf",height=10, width=8,onefile=F)
+# traplot(post, parms = c(parameters))
+# dev.off()
 
 # autocorrelation plots----
 windows(record=T)
@@ -272,25 +272,47 @@ autocorr.summary<-data.frame(autocorr.summary)
 write.csv(autocorr.summary, file= paste0(out.path,"/autocorr.csv")) 
 
 
-#density and time series plots----
-post.samp <- post
-nvars <- dim(post.samp[[1]])[2]
-nsamps <- dim(post.samp[[1]])[1]
-int <- 25
-pdf("output/base_case/profiles.pdf",height=6, width=8)
-for(j in seq(1,nvars,int)){
-  par(mfrow=c(5,4),mai=c(0.3,0.3,0.2,0.2))
-  for(i in 0:(int-1)){
-    mindat=min(c(post.samp[[1]][,i+j],post.samp[[1]][,i+j]))
-    maxdat=max(c(post.samp[[1]][,i+j],post.samp[[1]][,i+j]))
-    plot(density(post.samp[[1]][,i+j]),col='blue',main=colnames(post.samp[[1]])[i+j],xlim=c(mindat,maxdat))
-    lines(density(post.samp[[2]][,i+j]),col='red')
-    lines(density(post.samp[[3]][,i+j]),col='green')
-    
-    plot(as.numeric(post.samp[[1]][,i+j]),col='blue',main=colnames(post.samp[[1]])[i+j],ylim=c(mindat,maxdat),type='l')
-    lines(as.numeric(post.samp[[2]][,i+j]),col='red')
-    lines(density(post.samp[[3]][,i+j]),col='green')
-  }}
-dev.off()
-dev.off()
-
+# #density and time series plots----
+# post.samp <- post
+# nvars  <- dim(post.samp[[1]])[2]
+# nsamps <- dim(post.samp[[1]])[1]
+# int    <- 30
+# 
+# pdf("output/base_case/profiles.pdf", height=6, width=8)
+# 
+# for (j in seq(1, nvars, int)) {
+#   
+#   par(mfrow=c(5,4), mai=c(0.3,0.3,0.2,0.2))
+#   
+#   for (i in 0:(int-1)) {
+#     
+#     idx <- i + j
+#     if (idx > nvars) break
+#     
+#     # Combine all chains for consistent axis limits
+#     allvals <- c(post.samp[[1]][,idx],
+#                  post.samp[[2]][,idx],
+#                  post.samp[[3]][,idx])
+#     
+#     mindat <- min(allvals)
+#     maxdat <- max(allvals)
+#     
+#     # --- Density plot ---
+#     plot(density(post.samp[[1]][,idx]), col='blue',
+#          main=colnames(post.samp[[1]])[idx],
+#          xlim=c(mindat, maxdat))
+#     lines(density(post.samp[[2]][,idx]), col='red')
+#     lines(density(post.samp[[3]][,idx]), col='green')
+#     
+#     # --- Trace plot ---
+#     plot(post.samp[[1]][,idx], type='l', col='blue',
+#          main=colnames(post.samp[[1]])[idx],
+#          ylim=c(mindat, maxdat))
+#     lines(post.samp[[2]][,idx], col='red')
+#     lines(post.samp[[3]][,idx], col='green')
+#   }
+# }
+# 
+# dev.off()
+# 
+# 

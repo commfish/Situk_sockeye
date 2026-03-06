@@ -1,6 +1,6 @@
 # Situk sockeye state space model
 # authors: Sara E Miller 
-# Last edited: SMarch 2026
+# Last edited: March 2026
 # must download program JAGS for this script to work
 
 # load libraries----
@@ -29,14 +29,16 @@ library(extrafont)
 # if test runs then do sensitivity tests with explore, and final run with full
 # "explore" version takes ~10min with the current settings.
 out.label <-  "base_case"  # label to be used for the output folder (and for scenario comparisons)
-package.use <- "rjags"  #"rjags"  or "R2jags"
+package.use <- "rjags"  
 jags.settings <- "test"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
 source("code/model_source.R") 
 print(jag.model.SR)
-model_file_loc = paste("code/","Situk_sockeye.txt", sep="")
+model_file_loc=paste("code/","Situk_sockeye.txt", sep="")
 write.model(jag.model.SR, model_file_loc)
+
+
 
 # load custom functions
 source("code/functions.R")
