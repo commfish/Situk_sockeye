@@ -12,14 +12,14 @@ out.path <- paste0("output/", out.label)
 parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c")
 
 # Numerical summary of each parameter (mean, median, quantiles of posteriors)----
-effectiveN<-coda::effectiveSize(post) #https://stats.stackexchange.com/questions/429470/what-is-the-correct-effective-sample-size-ess-calculation
-as.data.frame(effectiveN)%>%
+coda::effectiveSize(post) %>%#https://stats.stackexchange.com/questions/429470/what-is-the-correct-effective-sample-size-ess-calculation
+  as.data.frame %>%
   write.csv(., file= paste0(out.path,"/effectiveN.csv")) 
-summary<-summary(post)  
+
+summary <- summary(post)  
 stats<-summary$statistics;  colnames(stats)
 quants<-summary$quantiles;  colnames(quants)
-statsquants <- cbind(stats,quants) 
-statsquants %>% 
+cbind(stats,quants) %>% 
   as.data.frame() %>% 
   dplyr::select(Mean, SD, 'Time-series SE', '2.5%', '50%', '97.5%') %>%
   dplyr::rename(time_series_se = 'Time-series SE') %>%
@@ -29,13 +29,15 @@ statsquants %>%
   write.csv(., file= paste0(out.path,"/statsquants.csv"))    
 
 # Gelman Diagnostics----
-gel <- as.data.frame(gelman.diag(post, multivariate=F)[[1]])
-poor.threshold = 1.01 #values less than 1.01 are generally considered converged
-gel %>%
-  rownames_to_column('variable') %>%
-  rename(point_estimate = "Point est.") %>%
-  mutate (converge = ifelse(point_estimate < poor.threshold, "true", "false")) %>%
-  write.csv(., file= paste0(out.path,"/gelman.csv"))   
+poor.threshold <- 1.01  # R-hat < 1.01 = converged
+
+gel_df <- gelman.diag(post, multivariate = FALSE)[[1]] %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column("variable") %>%
+  dplyr::rename(point_estimate = `Point est.`) %>%
+  dplyr::mutate(converge = ifelse(point_estimate < poor.threshold, "true", "false"))
+
+write.csv(gel_df, file = file.path(out.path, "gelman.csv"), row.names = FALSE)
 
 # Geweke Diagnostics----
 #Examine convergence of the Markov chains using the Geweke's convergence diagnostic
@@ -43,6 +45,7 @@ gel %>%
 #of the means of the ﬁrst and last part of a Markov chain (by default the ﬁrst 10% and the last 50%).
 #As for a cut-off you can compare to the standard normal critical values z α/2 where α=0.05
 #null hypothesis is rejected if Z large (used to determine the burn-in period)
+
 # Geweke diagnostic
 l <- geweke.diag(post)
 df <- data.frame(matrix(unlist(l), nrow=length(l), byrow=T),stringsAsFactors=FALSE)
@@ -59,6 +62,19 @@ x <- cbind(names, df)
 x  %>% 
   dplyr::select(-variable1) %>%
   write.csv(., paste0(out.path,"/geweke.csv")) 
+
+# compute Geweke diagnostics
+g <- geweke.diag(post)
+
+zmat <- do.call(cbind, lapply(g, function(x) x$z))# z=0 is good convergence; >2 is potential issue
+
+geweke_df <- as.data.frame(zmat)
+geweke_df$variable <- rownames(geweke_df)
+rownames(geweke_df) <- NULL
+
+geweke_df <- dplyr::relocate(geweke_df, variable)
+colnames(geweke_df)[2:ncol(geweke_df)] <- paste0("chain", seq_len(ncol(geweke_df) - 1))
+geweke_df
 
 pdf("output/base_case/geweke.pdf",height=10, width=8,onefile=T)
 geweke.plot(post)
@@ -127,12 +143,15 @@ rbind(x1,x2) %>%
   write.csv(., file= paste0(out.path,"/quantiles_lambert.csv"))    
 
 # lambert density plot setup----
-lnalpha_draws <- post_mat[, "lnalpha"]
+post_mat <- as.matrix(post)
+lnalpha_draws  <- post_mat[, "lnalpha"]
 lnalphac_draws <- post_mat[, "lnalpha.c"]
-beta_draws  <- post_mat[, "beta"]
-Smsy <- (1-lambert_W0(exp(1-lnalpha_draws)))/beta_draws
-Smsy.c <- (1-lambert_W0(exp(1-lnalphac_draws)))/beta_draws
-Umsy = (1-lambert_W0(exp(1-lnalpha_draws)))
+beta_draws     <- post_mat[, "beta"]
+
+Smsy   <- (1 - lambert_W0(exp(1 - lnalpha_draws))) / beta_draws
+Smsy.c <- (1 - lambert_W0(exp(1 - lnalphac_draws))) / beta_draws
+Umsy   <-  1 - lambert_W0(exp(1 - lnalpha_draws))
+
 
 df1 <- data.frame(Smsy = Smsy)
 df2 <- data.frame(Umsy = Umsy)
@@ -224,3 +243,4 @@ dens_plot <- ggplot(df_trace, aes(value, fill = chain)) +
   facet_wrap(~ param, scales = "free") +
   theme_bw()
 ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
+

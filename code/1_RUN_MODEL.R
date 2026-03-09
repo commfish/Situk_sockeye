@@ -55,9 +55,9 @@ if(jags.settings == "explore"){
 }
 
 if(jags.settings == "full"){
-  n.adapt.use <- 10000  ; n.iter.use <- 1000000    #1,000,000 per chain; 3 chains; thin by 1000
-  n.burnin.use <- 100000  # consider increasing this?
-  thin.use = 1000; by.use <- 1000 # this is just for the progress bar 
+  n.adapt.use <- 10000  ; n.iter.use <- 200000    #200000 per chain; 3 chains; thin by 1000
+  n.burnin.use <- 10000  
+  thin.use = 100; by.use <- 1000 # this is just for the progress bar 
 }
 
 # STEP 2: READ IN DATA, MODEL, AND INITIAL VALUES----
