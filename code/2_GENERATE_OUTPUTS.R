@@ -47,23 +47,6 @@ write.csv(gel_df, file = file.path(out.path, "gelman.csv"), row.names = FALSE)
 #null hypothesis is rejected if Z large (used to determine the burn-in period)
 
 # Geweke diagnostic
-l <- geweke.diag(post)
-df <- data.frame(matrix(unlist(l), nrow=length(l), byrow=T),stringsAsFactors=FALSE)
-df <- t(df) %>%
-  as.data.frame() %>%
-  rownames_to_column('variable1') -> df
-colnames(df) <- c("variable1", "chain1", "chain2", "chain3")
-names <-read.csv(file = paste0(out.path,"/statsquants.csv"))
-names  %>%
-  dplyr::select(variable) %>% 
-  add_row(variable = "frac1") %>% #0.1 and 0.5 default
-  add_row(variable = "frac2")  -> names
-x <- cbind(names, df)
-x  %>% 
-  dplyr::select(-variable1) %>%
-  write.csv(., paste0(out.path,"/geweke.csv")) 
-
-# compute Geweke diagnostics
 g <- geweke.diag(post)
 
 zmat <- do.call(cbind, lapply(g, function(x) x$z))# z=0 is good convergence; >2 is potential issue
@@ -74,7 +57,7 @@ rownames(geweke_df) <- NULL
 
 geweke_df <- dplyr::relocate(geweke_df, variable)
 colnames(geweke_df)[2:ncol(geweke_df)] <- paste0("chain", seq_len(ncol(geweke_df) - 1))
-geweke_df
+write.csv(geweke_df, paste0(out.path,"/geweke.csv")) 
 
 pdf("output/base_case/geweke.pdf",height=10, width=8,onefile=T)
 geweke.plot(post)
@@ -105,42 +88,50 @@ names(coda1) <- parameters
 names(coda2) <- parameters
 names(coda3) <- parameters
 
-coda <- rbind(coda1, coda2, coda3)
-write.csv(coda, file= paste0(out.path,"/coda.csv") ,row.names=FALSE)  
-
-coda %>% 
+rbind(coda1, coda2, coda3) %>%
   mutate(Smsy_lambert.c = (1-lambert_W0(exp(1-lnalpha.c)))/beta, # mean recruitment
          Smsy_lambert = (1-lambert_W0(exp(1-lnalpha)))/beta, # median recruitment
-         Umsy_lambert = (1-lambert_W0(exp(1-lnalpha.c))),
+         Umsy_lambert.c = (1-lambert_W0(exp(1-lnalpha.c))),
+         Umsy_lambert = (1-lambert_W0(exp(1-lnalpha))),
+         Rmsy.c = Smsy_lambert.c*exp(lnalpha.c-beta*Smsy_lambert.c),
          Rmsy = Smsy_lambert*exp(lnalpha-beta*Smsy_lambert),
-         MSY = Rmsy-Smsy_lambert)  %>%
-  as.data.frame() %>%
-  dplyr::select(Smsy_lambert.c,Smsy_lambert, Umsy_lambert, MSY) -> coda
+         MSY.c = Rmsy.c-Smsy_lambert.c,
+         MSY = Rmsy-Smsy_lambert,
+         Seq.c = lnalpha.c/beta,
+         Seq = lnalpha/beta,
+         Rmax.c = exp(lnalpha.c)*(1/beta)*exp(-1),
+         Rmax = exp(lnalpha)*(1/beta)*exp(-1),
+         Smax = 1/beta) %>%
+  as.data.frame() -> coda
 
-coda %>% 
-  apply(., 2, sd) %>%
-  as.data.frame()%>%
-  t()%>%
-  as.data.frame()%>%
-  rownames_to_column('variable') %>%
-  mutate(variable = ifelse(variable == '.', "sd", "sd"))-> sd
+write.csv(coda, file= paste0(out.path,"/coda.csv") ,row.names=FALSE)  
 
-coda %>% 
-  apply(., 2, mean) %>%
+qtab <- apply(coda, 2, quantile, #quantiles
+              probs = c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1)) %>%
   as.data.frame() %>%
-  t()%>%
-  as.data.frame() %>%
-  rownames_to_column('variable') %>%
-  mutate(variable = ifelse(variable == '.', "mean", "mean")) %>%
-rbind(., sd) -> x1
+  rownames_to_column("stat")
 
-q1 <- apply(coda,2,quantile,probs=c(0,0.025,0.05,0.5,0.95,0.975,1))
-q1 %>%
-  as.data.frame() %>%
-  rownames_to_column('variable') -> x2
-rbind(x1,x2) %>%
+mtab <- apply(coda, 2, mean) %>% #means
   t() %>%
-  write.csv(., file= paste0(out.path,"/quantiles_lambert.csv"))    
+  as.data.frame() %>%
+  mutate(stat = "mean")
+
+stab <- apply(coda, 2, sd) %>% # stdev
+  t() %>%
+  as.data.frame() %>%
+  mutate(stat = "sd")
+
+x <- bind_rows(qtab, mtab, stab) %>% # combine
+  column_to_rownames("stat") %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("variable")
+
+names(x) <- c("variable","0","2.5","5","50","95","97.5","100","mean","sd")
+
+x %>%
+  mutate(across(-variable, ~as.numeric(.))) %>%
+write.csv(., file= paste0(out.path,"/quantiles_lambert.csv"))    
 
 # lambert density plot setup----
 post_mat <- as.matrix(post)
@@ -203,7 +194,7 @@ ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 
 # post is your mcmc.list from coda.samples()
 post_df <- as.data.frame(as.mcmc(do.call(rbind, post))) %>%
-  mutate(iter = row_number()) %>%
+  mutate(iter = 1) %>%
   pivot_longer(
     cols = -iter,
     names_to = "parameter",
@@ -218,10 +209,11 @@ ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 
 # trace plots
 df_trace <- as.data.frame.table(post.arr, responseName = "value") %>%
-  rename(
+  dplyr::rename(
     iter  = iter,
-    param = var,
-    chain = chain) %>%
+    var = var,
+    chain = chain,
+    value  = value) %>%
   mutate(
     iter  = as.numeric(iter),
     chain = as.factor(chain))
@@ -229,7 +221,7 @@ df_trace <- as.data.frame.table(post.arr, responseName = "value") %>%
 out.file <- paste0("output/base_case/trace_plots.png")
 ggplot(df_trace, aes(x = iter, y = value, color = chain)) +
   geom_line(alpha = 0.7, linewidth = 0.4) +
-  facet_wrap(~ param, scales = "free_y") +
+  facet_wrap(~ var, scales = "free_y") +
   labs(x = "Iteration", y = "Value", color = "Chain") +
   theme_bw(base_size = 12) +
   theme(
@@ -240,7 +232,7 @@ ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 out.file <- paste0("output/base_case/dens_plots.png")
 dens_plot <- ggplot(df_trace, aes(value, fill = chain)) +
   geom_density(alpha = 0.4) +
-  facet_wrap(~ param, scales = "free") +
+  facet_wrap(~ var, scales = "free") +
   theme_bw()
 ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 
