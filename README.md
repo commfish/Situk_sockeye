@@ -20,9 +20,6 @@ robust harvest policy. Clark et al. (2002) also recommended that the escapement 
 
 This repository is a re-analysis of the Situk River sockeye salmon escapement goal with data from years 1976 through 2018.
 
-<img src="https://github.com/commfish/Situk_sockeye/tree/main/readme_files/Situk.png" width="600" />
-
-**Figure 1.** Map of the Situk River drainage, Situk-Ahrnklin Inlet and upper and lower weir sites.
 
 ## References
 Clark, J. H., S. A. McPherson, and A. Burkholder. 1995. Biological escapement goal for Situk River sockeye
