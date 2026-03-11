@@ -6,9 +6,15 @@ brood
 
 # cleanup data
 brood %>% 
-  dplyr::select(S = spawn, R = recruit) %>% 
+  dplyr::select(S = spawn, R1 = recruit25, R2 = recruit50, R3 = recruit75) %>% 
   mutate(n()) -> sr
 
-nyrs <- nrow(sr) #calculates the number of years of data.
-dat <- list(nyrs = nyrs, S = sr$S, R = sr$R, 
+nyrs <- nrow(sr) #calculates the number of years of data
+
+# determine the dataset to run (only run one dat)
+dat <- list(nyrs = nyrs, S = sr$S, R = sr$R1, 
             rk =1, ar1=1)
+dat <- list(nyrs = nyrs, S = sr$S, R = sr$R2, 
+            rk =1, ar1=1)
+dat <- list(nyrs = nyrs, S = sr$S, R = sr$R2, 
+                                     rk =1, ar1=1)

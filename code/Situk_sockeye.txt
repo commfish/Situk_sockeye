@@ -18,12 +18,14 @@ model {
 
   # Priors
   lnalpha ~ dnorm(0,1.0E-6) T(0,3)
+  #lnalpha ~ dunif(-1, 4) 
   beta ~ dnorm(0,1.0E-6) T(0,) 
-  sigma   ~ dunif(0, 2)
+  #beta ~ dunif(-1,5) 
+   sigma   ~ dunif(0, 2)
   sigmaw  ~ dunif(0, 2)
 
   # AR(1) coefficient
-  phi ~ dnorm(0,1.0E-6) T(-1, 1)
+  phi ~ dnorm(0, 1.0E-6) T(-1, 1)
 
   # Initial residual
   e0 ~ dnorm(0, 25)
