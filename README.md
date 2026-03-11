@@ -33,3 +33,8 @@ Eggers, D. M. 1993. Robust harvest policies for Pacific salmon fisheries. , p. 8
 R. J. Marasco, C. Pautzke, and T. J. Quinn II editors. Proceedings of the International Symposium on
 Management Strategies for exploited Fish Populations. Alaska Sea Grant College Program report No. 93-02,
 University of Alaska Fairbanks.
+
+## Disclaimer
+
+### Alaska Department of Fish & Game
+*ADF&G retains intellectual property rights to data collected by or for ADF&G. Any dissemination of the data must credit ADF&G as the source, with a disclaimer that exonerates the department for errors or deficiencies in reproduction, subsequent analysis, or interpretation. The State of Alaska, Department of Fish and Game, makes no express or implied warranties (including warranties of merchantability and fitness) with respect to the accuracy, character, function, or capabilities of the data, services, or products or their appropriateness for any particular purpose. The Department of Fish and Game is not liable for any direct, incidental, indirect, special, compensatory, consequential or other damages suffered by the user or any other person or entity from the use of or failure of the data, services, or products even if the Department of Fish and Game has been advised of the possibility of such potential loss or damage. The entire risk as to the results of the use of the data, services, or products is assumed by the user. Data may be subject to periodic change without prior notification.*
