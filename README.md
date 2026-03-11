@@ -1,5 +1,5 @@
-# Situk_sockeye
-Sockeye salmon **Oncorhynchus nerka** returning to the Situk River, near Yakutat, Alaska, support
+# Situk Sockeye Salmon Escapement Goal Analysis
+Sockeye salmon *Oncorhynchus nerka* returning to the Situk River, near Yakutat, Alaska, support
 commercial set gill net, sport, and subsistence/personal use fisheries. The commercial set gill net
 fishery (fishing district 182-70) takes place in the Situk-Ahrnklin Inlet where the Situk, Ahrnklin, and
 Lost rivers drain into the Gulf of Alaska. For several years prior to 1995, the Situk-Ahrnklin Inlet and 
@@ -20,9 +20,9 @@ robust harvest policy. Clark et al. (2002) also recommended that the escapement 
 
 This repository is a re-analysis of the Situk River sockeye salmon escapement goal with data from years 1976 through 2018.
 
-<img src="https://github.com/commfish-private/Situk_sockeye/blob/master/readme_files/Situk.jpg" width="600" />
+<img src="https://github.com/commfish-private/Situk_sockeye/blob/master/readme_files/Situk.png" width="600" />
 
-*Figure 1. Map of the Situk River drainage, Situk-Ahrnklin Inlet and upper and lower weir sites.*
+**Figure 1.** Map of the Situk River drainage, Situk-Ahrnklin Inlet and upper and lower weir sites.
 
 ## References
 Clark, J. H., S. A. McPherson, and A. Burkholder. 1995. Biological escapement goal for Situk River sockeye
