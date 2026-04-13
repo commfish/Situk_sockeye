@@ -150,59 +150,15 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta){
     dplyr::select(Escapement, variable, value, sra, max_pct) %>%
     mutate(Escapement = as.numeric(Escapement),
            Probability = as.numeric(value),
-           max_pct = as.factor(max_pct)) -> my4
-  my4 %>%
-    filter(sra == "Yield Profile") -> fig_data1
-  
-  my4 %>%
-    filter(sra == "Overfishing Profile") -> fig_data2
-  
-  my4 %>%
-    filter(sra == "Recruitment Profile") -> fig_data3
-  
-  # EXPECTED SUSTAINED YIELD 
-  out.file <- paste0("output/base_case/processed/expect_yield.png")
-  theme_set(theme_report(base_family = "Times", base_size = 12))
-  ggplot(qm, aes(Escapement, Median))+geom_line(size=1)+
-    geom_ribbon(aes(ymin = q5, ymax = q95), alpha=.15)+
-    geom_ribbon(aes(ymin = q10, ymax = q90), alpha=.15)+ xlab("Escapement")+
-    ylab("Expected Yield")+scale_y_continuous(labels = comma)+
-    scale_x_continuous(labels = comma,breaks = seq(0, 200000, 25000), limits = c(0,200000))+
-    scale_y_continuous(labels = comma,breaks = seq(-200000, 200000, 25000), limits = c(-200000,200000))+
-    geom_vline(xintercept = LowerB,linetype = "longdash" )+geom_vline(xintercept = UpperB ,linetype = "longdash")+
-    geom_vline(xintercept = SMSY,linetype = 1 )
-  ggsave(out.file, dpi = 1000, height = 4, width = 6, units = "in")
-  
-  # SEAK plot 
-  theme_set(theme_report(base_family = "Times", base_size = 12))
-  ggplot(fig_data1, aes(x = Escapement, y = Probability, linetype = max_pct)) + ggtitle("(c) Yield Profile") + 
-    annotate("rect", xmin = 40000, xmax = 75000, ymin = 0, ymax = 1,
-             inherit.aes = FALSE, fill = "grey80", alpha = 0.9) +
-    geom_line() +    theme(plot.title = element_text(size = 12, face = "bold"),
-                           strip.text.y = element_text(size=0),legend.position= "none") +
-    scale_x_continuous(labels = comma, breaks = seq(0, 100000, 20000), limits = c(0, 100000))+
-    scale_y_continuous(breaks = seq(0, 1, 0.25), limits = c(0, 1))+
-    scale_linetype_discrete(name = "Percent of Max.") + xlab('Escapement (S)')+
-    facet_grid(sra ~ .)  -> plot1
-  
-  ggplot(fig_data2, aes(x = Escapement, y = Probability, linetype = max_pct)) + 
-    annotate("rect", xmin = 40000, xmax = 75000, ymin = 0, ymax = 1,
-             inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("(a) Overfishing Profile") + 
-    theme(plot.title = element_text(size = 12, face = "bold"),
-          strip.text.y = element_text(size=0),legend.position=c(0.92,0.86), legend.title = element_blank()) +
-    geom_line() + xlab('Escapement (S)') +
-    scale_x_continuous(labels = comma, breaks = seq(0, 100000, 20000), limits = c(0, 100000))+
-    scale_linetype_discrete(name = "Percent of Max.") + 
-    facet_grid(sra ~ .) -> plot2
-  
-  ggplot(fig_data3, aes(x = Escapement, y = Probability, linetype = max_pct)) + 
-    annotate("rect", xmin = 40000, xmax = 75000, ymin = 0, ymax = 1,
-             inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("(b) Recruitment Profile") + 
-    geom_line() + xlab('Escapement (S)') +   theme(plot.title = element_text(size = 12, face = "bold"),
-                                                   strip.text.y = element_text(size=0),legend.position= "none") +
-    scale_x_continuous(labels = comma, breaks = seq(0, 100000, 20000), limits = c(0, 100000))+
-    scale_linetype_discrete(name = "Percent of Max.") +
-    facet_grid(sra ~ .)  -> plot3
-  cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
-  ggsave("output/base_case/processed/SEAK_report.png", dpi = 500, height = 7, width = 6, units = "in")}
+           max_pct = as.factor(max_pct)) %>%
+  write.csv(., file= "output/base_case/processed/optimal_yield_data.csv")}
 
+# spawner-recruit data
+srmodel <- function(lnalpha,beta,S,d){
+  s <- S/(10^d)
+  lnR <- log(S) + lnalpha - beta*s
+  R <- exp(lnR)
+  return(R)
+}
+
+  

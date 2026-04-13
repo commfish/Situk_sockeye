@@ -70,9 +70,9 @@ source("code/model_inits.R")
 # STEP 3: RUN THE MODEL AND PROCESS THE OUTPUT----
 # rjags
 start.jags <- proc.time()
-sw.randomseed <- 2540
+sw.randomseed <- 200
 if(package.use == "rjags" & sensitivity.analysis == 0){
-  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c")
+  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0")
   
   jmod <- rjags::jags.model(
     file='code/Situk_sockeye.txt', 

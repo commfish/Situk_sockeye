@@ -9,7 +9,7 @@
 windowsFonts(Times=windowsFont("Arial"))
 theme_set(theme_sleek())
 out.path <- paste0("output/", out.label)
-parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c")
+parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha","e0")
 
 # Numerical summary of each parameter (mean, median, quantiles of posteriors)----
 coda::effectiveSize(post) %>%#https://stats.stackexchange.com/questions/429470/what-is-the-correct-effective-sample-size-ess-calculation
@@ -131,7 +131,7 @@ names(x) <- c("variable","0","2.5","5","50","95","97.5","100","mean","sd")
 
 x %>%
   mutate(across(-variable, ~as.numeric(.))) %>%
-write.csv(., file= paste0(out.path,"/quantiles_lambert.csv"))    
+  write.csv(., file= paste0(out.path,"/quantiles_lambert.csv"))    
 
 # lambert density plot setup----
 post_mat <- as.matrix(post)
@@ -235,4 +235,69 @@ dens_plot <- ggplot(df_trace, aes(value, fill = chain)) +
   facet_wrap(~ var, scales = "free") +
   theme_bw()
 ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
+
+# recruit residuals
+# lambert calc----
+parameters <- c("lnalpha", "beta", "lnalpha.c", "e0", "phi")
+x <- as.data.frame(post.arr[, parameters, ])
+
+coda1 <- x[, 1:5]
+coda2 <- x[, 6:10]
+coda3 <- x[, 11:15]
+
+names(coda1) <- parameters
+names(coda2) <- parameters
+names(coda3) <- parameters
+
+rbind(coda1, coda2, coda3) %>%
+  mutate(Smsy_lambert.c = (1-lambert_W0(exp(1-lnalpha.c)))/beta, # mean recruitment
+         Smsy_lambert = (1-lambert_W0(exp(1-lnalpha)))/beta, # median recruitment
+         Umsy_lambert.c = (1-lambert_W0(exp(1-lnalpha.c))),
+         Umsy_lambert = (1-lambert_W0(exp(1-lnalpha))),
+         Rmsy.c = Smsy_lambert.c*exp(lnalpha.c-beta*Smsy_lambert.c),
+         Rmsy = Smsy_lambert*exp(lnalpha-beta*Smsy_lambert),
+         MSY.c = Rmsy.c-Smsy_lambert.c,
+         MSY = Rmsy-Smsy_lambert,
+         Seq.c = lnalpha.c/beta,
+         Seq = lnalpha/beta,
+         Rmax.c = exp(lnalpha.c)*(1/beta)*exp(-1),
+         Rmax = exp(lnalpha)*(1/beta)*exp(-1),
+         Smax = 1/beta) %>%
+  as.data.frame() -> SR.post
+
+# recruit plot
+read.csv("data/Situk_sockeye.csv") %>%
+  mutate(yield = (recruit50 - spawn),
+         logR = log(recruit50)) -> dat
+R <- dat$recruit50
+S <- dat$spawn
+d <- floor(log10(mean(S)))
+
+lnalpha <-SR.post$lnalpha
+beta <- SR.post$beta
+phi <- SR.post$phi
+e0 <- SR.post$e0
+
+# set up empty matrix
+ncol <- length(S)   # S
+nrow <- length(lnalpha)  #  Extract number of MCMC sample
+
+# Ccreate Residuals  MCMC matrix
+RD <- matrix(NA,nrow=nrow,ncol=ncol)
+RD2 <- matrix(NA,nrow=nrow,ncol=ncol) # AR1 residuals
+
+for(i in 1:nrow){
+  # calculated expected Returns form each MCMC SR model parameters
+  Ey <- srmodel(lnalpha[i],beta[i],S,d) # Expected
+  RD[i,] <- log(R)-log(Ey) # basic Ricker
+}
+
+#  residuals for AR1 Remove AR1 correlation
+for(i in 1:nrow){
+  RD2[i,2:ncol] <- RD[i,2:ncol] - phi[i]*RD[i,1:(ncol-1)]
+  RD2[i,1] <- RD[i,1]-phi[i]*e0[i]
+}
+
+out <- list(RD=RD,RD2=RD2)
+write.csv(out,file=paste0("output/base_case/processed/recruit_data.csv"), row.names=FALSE)
 

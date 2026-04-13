@@ -12,9 +12,8 @@ brood %>%
 nyrs <- nrow(sr) #calculates the number of years of data
 
 # determine the dataset to run (only run one dat)
-dat <- list(nyrs = nyrs, S = sr$S, R = sr$R1, 
-            rk =1, ar1=1)
-dat <- list(nyrs = nyrs, S = sr$S, R = sr$R2, 
-            rk =1, ar1=1)
-dat <- list(nyrs = nyrs, S = sr$S, R = sr$R2, 
-                                     rk =1, ar1=1)
+#dat <- list(nyrs = nyrs, S = sr$S, R = sr$R1, 
+            #rk =1, ar1=1)
+dat <- list(nyrs = nyrs, S = sr$S, R = sr$R2, rk =1, ar1=1)
+#dat <- list(nyrs = nyrs, S = sr$S, R = sr$R2, 
+#                                     rk =1, ar1=1)
