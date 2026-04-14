@@ -277,7 +277,7 @@ d <- floor(log10(mean(S)))
 
 # MCMC parameters
 lnalpha <-SR.post$lnalpha
-beta <- SR.post$beta*10^-4
+beta <- SR.post$beta
 phi <- SR.post$phi
 e0 <- SR.post$e0
 
