@@ -29,7 +29,7 @@ library(runjags)
 # "explore" version takes ~10min with the current settings.
 out.label <-  "base_case"  # label to be used for the output folder (and for scenario comparisons)
 package.use <- "rjags"  
-jags.settings <- "test"  # "test" or "explore" or full" 
+jags.settings <- "explore"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
 # load custom functions
@@ -68,7 +68,6 @@ source("code/model_data.R")
 source("code/model_inits.R")
 
 # STEP 3: RUN THE MODEL AND PROCESS THE OUTPUT----
-# rjags
 start.jags <- proc.time()
 sw.randomseed <- 200
 if(package.use == "rjags" & sensitivity.analysis == 0){
@@ -86,8 +85,7 @@ if(package.use == "rjags" & sensitivity.analysis == 0){
   end.jags <- proc.time()   # store time for MCMC
   post.arr <- as.array(post) # convert to an accessible obj
   
-  # run the script that generates all the outputs 
-  #source("state_space_model/2023_analysis/recommendations_added/code/2_GENERATE_OUTPUTS.R")
+# run the script that generates all the outputs 
   end.output  <- proc.time() 
   print("Jags took")
   print(end.jags - start.jags)

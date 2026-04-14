@@ -3,7 +3,7 @@ model {
   # Observation model: lognormal recruits
   for (y in 1:nyrs) {
     R[y] ~ dlnorm(mu[y], Tau)
-    fit[y] <- log(S[y]) + lnalpha - rk * (beta * S[y])
+    fit[y] <- log(S[y]) + lnalpha - rk * (beta * S[y]/10^d)
     e[y] <- log(R[y]) - fit[y]
   }
 
@@ -21,7 +21,7 @@ model {
   #lnalpha ~ dunif(-1, 4) 
   beta ~ dnorm(0,1.0E-6) T(0,) 
   #beta ~ dunif(-1,5) 
-   sigma   ~ dunif(0, 2)
+  sigma   ~ dunif(0, 2)
   sigmaw  ~ dunif(0, 2)
 
   # AR(1) coefficient
@@ -44,5 +44,6 @@ model {
 
   # Back‑transform
   alpha <- exp(lnalpha)
+  alpha.c <- exp(lnalpha.c)
 
 }
