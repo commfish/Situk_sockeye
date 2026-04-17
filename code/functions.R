@@ -161,4 +161,33 @@ srmodel <- function(lnalpha,beta,S,d){
   return(R)
 }
 
+# escapement values
+get_two_nearest_bounds <- function(tbl, column, target) {
+  ind <- tbl[[column]]
+  esc <- tbl$Escapement
   
+  # Exact matches
+  exact <- esc[ind == target]
+  if (length(exact) == 2) {
+    return(tibble(target_value = target,
+                  lower = min(exact),
+                  upper = max(exact)))
+  }
+  if (length(exact) == 1) {
+    return(tibble(target_value = target,
+                  lower = exact,
+                  upper = exact))
+  }
+  
+  # No exact match → take two nearest
+  d <- abs(ind - target)
+  idx <- order(d)[1:2]
+  vals <- esc[idx]
+  
+  tibble(
+    target_value = target,
+    lower = min(vals),
+    upper = max(vals)
+  )
+}
+

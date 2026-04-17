@@ -42,7 +42,8 @@ read.csv("output/base_case/processed/recruit_data.csv") -> recruit
 
 # analysis----
 # function for probability profiles and figures
-profile(i = 10, z = 50, xa.start = 0, xa.end = 8000, lnalpha.c, beta1, coda) # can change i,z, xa.start, xa.end 
+#profile(i = 10, z = 50, xa.start = 0, xa.end = 8000, lnalpha.c, beta1, coda) # can change i,z, xa.start, xa.end 
+profile(i = 5, z = 20, xa.start = 0, xa.end = 8000, lnalpha.c, beta1, coda) # can change i,z, xa.start, xa.end 
 QM <- read.csv("output/base_case/processed/QM.csv")
 CI <- read.csv("output/base_case/processed/CI.csv")
 
@@ -177,4 +178,12 @@ ggplot(aes(year, R.m)) +
   theme(axis.text.x = element_text(size = 10)) -> plot2
 cowplot::plot_grid(plot2, plot1,  align = "v", nrow = 2, ncol=1)
 ggsave("output/base_case/processed/resids_recruit.png", dpi = 500, height = 7, width = 8, units = "in")
+
+read.csv("output/base_case/processed/Y.csv") -> df
+get_two_nearest_bounds(df, "oy_0.9", 0.7)
+get_two_nearest_bounds(df, "oy_0.9", 0.75)
+get_two_nearest_bounds(df, "oy_0.9", 0.80)
+get_two_nearest_bounds(df, "oy_0.9", 0.85)
+get_two_nearest_bounds(df, "oy_0.9", 0.9)                     
+
 

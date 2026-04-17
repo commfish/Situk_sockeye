@@ -78,7 +78,7 @@ write.csv(quant_table, paste0(out.path, "/percentiles.csv"), row.names = FALSE)
 
 # lambert calc----
 # Extract parameters from posterior array
-parameters <- c("lnalpha", "beta", "lnalpha.c")
+parameters <- c("lnalpha", "lnalpha.c","beta")
 
 # Combine chains into single data frame
 coda <- as.data.frame(post.arr[, parameters, ]) %>%
@@ -92,29 +92,31 @@ coda <- as.data.frame(post.arr[, parameters, ]) %>%
   mutate(
     beta1 = beta * 10^-4,
     
+# alpha
+    alpha = exp(lnalpha),
+    alpha.c   = exp(lnalpha.c),
 # Smsy - spawners at maximum sustainable yield
-Smsy_lambert.c = (10^d) * (1 - lambert_W0(exp(1 - lnalpha.c))) / beta,
 Smsy_lambert   = (10^d) * (1 - lambert_W0(exp(1 - lnalpha)))   / beta,
-    
+Smsy_lambert.c = (10^d) * (1 - lambert_W0(exp(1 - lnalpha.c))) / beta,
+
 # Umsy - exploitation rate at MSY
-Umsy_lambert.c = Smsy_lambert.c * beta / (10^d),
 Umsy_lambert   = Smsy_lambert   * beta / (10^d),
-    
+Umsy_lambert.c = Smsy_lambert.c * beta / (10^d),  
+
 # Smax - spawners at maximum recruitment
 Smax = (10^d) / beta,
     
 # Rmsy - recruits at MSY
 Rmsy.c = Smsy_lambert.c * exp(lnalpha.c - beta1 * Smsy_lambert.c),
 Rmsy   = Smsy_lambert   * exp(lnalpha   - beta1 * Smsy_lambert),
-    
-# MSY - maximum sustainable yield
-MSY.c = Rmsy.c - Smsy_lambert.c,
-MSY   = Rmsy   - Smsy_lambert,
-    
+ 
 # Seq - equilibrium spawner abundance
-Seq.c = lnalpha.c / beta1,
-Seq   = lnalpha   / beta1,
-    
+Seq   = lnalpha / beta1,
+
+# MSY - maximum sustainable yield
+MSY   = Rmsy   - Smsy_lambert,
+MSY.c   = Rmsy.c   - Smsy_lambert.c,    
+
 # Rmax - maximum recruitment
 Rmax.c = exp(lnalpha.c) * (1 / beta1) * exp(-1),
 Rmax   = exp(lnalpha)   * (1 / beta1) * exp(-1)) %>%
@@ -147,6 +149,7 @@ names(x) <- c("variable","0","2.5","5","50","95","97.5","100","mean","sd")
 
 x %>%
   mutate(across(-variable, ~as.numeric(.))) %>%
+  mutate(post_cv = sd/mean) %>%
   write.csv(., file= paste0(out.path,"/quantiles_lambert.csv"))    
 
 # lambert density plot setup----
@@ -312,3 +315,7 @@ names(RD2_df) <- paste0("RD2.", 1:n_years)
 out <- cbind(RD_df, RD2_df)
 write.csv(out, file = "output/base_case/processed/recruit_data.csv", row.names = FALSE)
 
+# create param table
+read.csv("output/base_case/quantiles_lambert.csv") %>%
+  dplyr::select(variable, X2.5, X50, X97.5, post_cv) %>%
+  write.csv(., file = "output/base_case/processed/params.csv", row.names = FALSE)

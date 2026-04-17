@@ -29,7 +29,7 @@ library(runjags)
 # "explore" version takes ~10min with the current settings.
 out.label <-  "base_case"  # label to be used for the output folder (and for scenario comparisons)
 package.use <- "rjags"  
-jags.settings <- "explore"  # "test" or "explore" or full" 
+jags.settings <- "full"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
 # load custom functions
@@ -54,11 +54,14 @@ if(jags.settings == "explore"){
   by.use <- 100 # this is just for the progress bar
 }
 
-if(jags.settings == "full"){
-  n.adapt.use <- 10000  ; n.iter.use <- 200000    #200000 per chain; 3 chains; thin by 1000
-  n.burnin.use <- 10000  
-  thin.use = 100; by.use <- 1000 # this is just for the progress bar 
+if (jags.settings == "full") {
+  n.adapt.use <- 20000      # number of adaptation iterations (tuning phase)
+  n.iter.use  <- 200000     # total iterations per chain (after adaptation)
+  n.burnin.use <- 20000     # burn-in iterations (discarded before sampling)
+  thin.use    <- 100        # thinning interval (keep every 100th sample)
+  by.use      <- 1000       # step size for progress bar updates
 }
+
 
 # STEP 2: READ IN DATA, MODEL, AND INITIAL VALUES----
 # generates the object "dat"
