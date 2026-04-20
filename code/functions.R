@@ -76,8 +76,8 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
   or_0.9 <- f.over(dat8)
   
   # Bind dataframes together
-  Y <- cbind(of_0.7,oy_0.7,or_0.7,of_0.8,oy_0.8,or_0.8,of_0.9,oy_0.9,or_0.9, c(0, x))
-  names(Y) <- c('of_0.7','oy_0.7','or_0.7','of_0.8','oy_0.8','or_0.8','of_0.9','oy_0.9',
+ yield <- cbind(of_0.7,oy_0.7,or_0.7,of_0.8,oy_0.8,or_0.8,of_0.9,oy_0.9,or_0.9, c(0, x))
+  names(yield) <- c('of_0.7','oy_0.7','or_0.7','of_0.8','oy_0.8','or_0.8','of_0.9','oy_0.9',
                 'or_0.9','Escapement')
   
   # Quantiles and Medians ----
@@ -96,9 +96,9 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
   qm <- data.frame(measure = names(mq), value = as.numeric(mq[1,]), Escapement=rep(c(0,x), length(unique(names(mq)))))
   qm <- spread(qm, measure, value)
   qm <- qm[c("q95", "q90", "Median","q10", "q5", "Escapement")]
-  Y <- Y[c("oy_0.9", "oy_0.8", "oy_0.7", "of_0.9", "of_0.8", "of_0.7","or_0.9","or_0.8","or_0.7","Escapement")]
+  yield  <- yield [c("oy_0.9", "oy_0.8", "oy_0.7", "of_0.9", "of_0.8", "of_0.7","or_0.9","or_0.8","or_0.7","Escapement")]
   write.csv(qm,("output/base_case/processed/QM.csv"), row.names=FALSE)
-  write.csv(Y,("output/base_case/processed/Y.csv"), row.names=FALSE)
+  write.csv(yield,("output/base_case/processed/yield.csv"), row.names=FALSE)
   
   # confidence intervals ----
   dat10 %>%
@@ -117,9 +117,9 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
   CI <- spread(CI, measure, value)
   CI <- CI[c("q95", "q90", "Median","q10", "q5", "Escapement")]
   write.csv(CI,("output/base_case/processed/CI.csv"), row.names=FALSE)
-  read.csv("output/base_case/processed/Y.csv") -> Y
+  read.csv("output/base_case/processed/yield.csv") -> yield 
   
-  Y %>% 
+  yield %>% 
     dplyr::select(Escapement, oy_0.9, oy_0.8, oy_0.7) %>% 
     gather(key="variable", value="value", -Escapement) %>% 
     mutate(sra = "Yield Profile",
@@ -127,7 +127,7 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
                            0.7,
                            ifelse(grepl("oy_0.8",variable),0.8, 0.9 )))-> my1
   
-  Y %>% 
+  yield %>% 
     dplyr::select(Escapement, of_0.9, of_0.8, of_0.7) %>% 
     gather(key="variable", value="value", -Escapement) %>% 
     mutate(sra = "Overfishing Profile",
@@ -136,7 +136,7 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
                            ifelse(grepl("of_0.8",variable),0.8, 0.9)))-> my2
   
   
-  Y %>% 
+  yield %>% 
     dplyr::select(Escapement, or_0.9, or_0.8, or_0.7) %>% 
     gather(key="variable", value="value", -Escapement) %>% 
     mutate(sra = "Recruitment Profile",
@@ -145,7 +145,7 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
                            ifelse(grepl("or_0.8",variable),0.8, 0.9 )))-> my3
   
   
-  my4<-rbind(my1, my2, my3)
+  my4 <- rbind(my1, my2, my3)
   my4 %>%
     dplyr::select(Escapement, variable, value, sra, max_pct) %>%
     mutate(Escapement = as.numeric(Escapement),
