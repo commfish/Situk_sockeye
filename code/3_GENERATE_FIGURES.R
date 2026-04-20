@@ -55,7 +55,7 @@ ggplot(data = CI, aes(x = Escapement, y = Median)) +
   xlab("Spawners (S)") +
   ylab("Recruits (R)") +
   geom_vline(xintercept = SMSY, color ="gray70", lty=2) +
-  scale_y_continuous(labels = comma,breaks = seq(0, 400000, 50000), limits = c(0, 400000)) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 300000, 50000), limits = c(0, 300000)) +
   scale_x_continuous(labels = comma,breaks = seq(0, 400000, 50000), limits = c(0, 400000)) +
   geom_line(aes(x = Escapement, y =Escapement),linetype="solid", size=0.75, color ="grey60") +
   geom_point(data = spawnrecruitdat, aes(x=spawn, y=recruit50),pch=1, size=2) + 
@@ -181,10 +181,10 @@ ggsave("output/base_case/processed/resids_recruit.png", dpi = 500, height = 7, w
 
 # create optimal yield plot
 read.csv("output/base_case/processed/Y.csv") -> df
-get_two_nearest_bounds(df, "oy_0.9", 0.7)
+get_two_nearest_bounds(df, "oy_0.9", 0.70)
 get_two_nearest_bounds(df, "oy_0.9", 0.75)
 get_two_nearest_bounds(df, "oy_0.9", 0.80)
 get_two_nearest_bounds(df, "oy_0.9", 0.85)
-get_two_nearest_bounds(df, "oy_0.9", 0.9)                     
+get_two_nearest_bounds(df, "oy_0.9", 0.90)                     
 
 
