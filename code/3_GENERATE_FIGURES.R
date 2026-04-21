@@ -1,7 +1,7 @@
 # R CODE TO CREATE PROFILES DATA AND FIGURES (Horsetail plots, age comp, maturity at age,
 # point estimate plots, yield plots)
-LowerB <- 30000 #lower bound of recommended escapement goal range (update)
-UpperB <- 70000 #upper bound of recommended escapement goal range (update)
+lower_bounds <- 33700 #lower bound of recommended escapement goal range (update)
+upper_bounds <- 59400 #upper bound of recommended escapement goal range (update)
 
 stat_quants <- read.csv(file= paste0(out.path,"/statsquants.csv"))
 quant_lambert <- read.csv(file= paste0(out.path,"/quantiles_lambert.csv")) 
@@ -11,7 +11,7 @@ lnalpha.c <- stat_quants[stat_quants$variable == "lnalpha.c", "X50."]
 beta <- stat_quants[stat_quants$variable == "beta", "X50."]
 beta1 <- beta*10^-4
 
-SMSY <- quant_lambert[quant_lambert$variable == "Smsy_lambert.c", "X50"]
+SMSY <- quant_lambert[quant_lambert$variable == "Smsy_lambert", "X50"]
 UMSY <- quant_lambert[quant_lambert$variable == "Umsy_lambert", "X50"]
 SMAX <- quant_lambert[quant_lambert$variable == "Smax", "X50"] 
 SEQ  <- quant_lambert[quant_lambert$variable == "Seq", "X50"]
@@ -43,21 +43,23 @@ read.csv("output/base_case/processed/recruit_data.csv") -> recruit
 # analysis----
 # function for probability profiles and figures
 #profile(i = 10, z = 50, xa.start = 0, xa.end = 8000, lnalpha.c, beta1, coda) # can change i,z, xa.start, xa.end 
-profile(i = 5, z = 20, xa.start = 0, xa.end = 20000, lnalpha.c, beta1, coda) # can change i,z, xa.start, xa.end 
+profile(i = 5, z = 20, xa.start = 0, xa.end = 20000, lnalpha.c, lnalpha, beta1, coda) # can change i,z, xa.start, xa.end 
 QM <- read.csv("output/base_case/processed/QM.csv")
-CI <- read.csv("output/base_case/processed/CI.csv")
+CI_median <- read.csv("output/base_case/processed/CI_median.csv")
+CI_mean <- read.csv("output/base_case/processed/CI_mean.csv")
 
 # horsetail (spawner recruit) plots
-ggplot(data = CI, aes(x = Escapement, y = Median)) +
-  geom_line(size=0.75, lty=2) +
+ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
+  geom_line(size=0.75, lty=1) +
   geom_ribbon(aes(ymin = q5, ymax = q95), alpha=.1) +
   geom_ribbon(aes(ymin = q10, ymax = q90), alpha=.2) +
+  geom_line(data = CI_mean, aes(x = Escapement, y = Median), size=0.75, lty=2) + 
   xlab("Spawners (S)") +
   ylab("Recruits (R)") +
-  geom_vline(xintercept = SMSY, color ="gray70", lty=2) +
+  #geom_vline(xintercept = SMSY, color ="gray70", lty=2) +
   scale_y_continuous(labels = comma,breaks = seq(0, 300000, 50000), limits = c(0, 300000)) +
-  scale_x_continuous(labels = comma,breaks = seq(0, 400000, 50000), limits = c(0, 400000)) +
-  geom_line(aes(x = Escapement, y =Escapement),linetype="solid", size=0.75, color ="grey60") +
+  scale_x_continuous(labels = comma,breaks = seq(0, 250000, 50000), limits = c(0, 250000)) +
+  geom_line(data = CI_median, aes(x = Escapement, y =Escapement),linetype="solid", size=0.75, color ="grey60") +
   geom_point(data = spawnrecruitdat, aes(x=spawn, y=recruit50),pch=1, size=2) + 
   theme(text=element_text(size=14)) +
   geom_text(size=3, data=spawnrecruitdat, aes(x=spawn, y=recruit50, label = year,family="Times",
@@ -88,7 +90,7 @@ optimal_yield_data %>%
   filter(sra == "Recruitment Profile") -> fig_data3
 
 ggplot(fig_data1, aes(x = Escapement, y = Probability)) + ggtitle("(c) Yield Profile") + 
-  annotate("rect", xmin = 40000, xmax = 75000, ymin = 0, ymax = 1,
+  annotate("rect", xmin = lower_bounds, xmax = upper_bounds, ymin = 0, ymax = 1,
            inherit.aes = FALSE, fill = "grey80", alpha = 0.9) +
   geom_line() +    theme(plot.title = element_text(size = 12, face = "bold"),
                          strip.text.y = element_text(size=0),legend.position= "none") +
@@ -98,7 +100,7 @@ ggplot(fig_data1, aes(x = Escapement, y = Probability)) + ggtitle("(c) Yield Pro
   facet_grid(sra ~ .)  -> plot1
 
 ggplot(fig_data2, aes(x = Escapement, y = Probability)) + 
-  annotate("rect", xmin = 40000, xmax = 75000, ymin = 0, ymax = 1,
+  annotate("rect", xmin = lower_bounds, xmax = upper_bounds, ymin = 0, ymax = 1,
            inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("(a) Overfishing Profile") + 
   theme(plot.title = element_text(size = 12, face = "bold"),
         strip.text.y = element_text(size=0),legend.position=c(0.92,0.86), legend.title = element_blank()) +
@@ -108,7 +110,7 @@ ggplot(fig_data2, aes(x = Escapement, y = Probability)) +
   facet_grid(sra ~ .) -> plot2
 
 ggplot(fig_data3, aes(x = Escapement, y = Probability)) + 
-  annotate("rect", xmin = 40000, xmax = 75000, ymin = 0, ymax = 1,
+  annotate("rect", xmin = lower_bounds, xmax = upper_bounds, ymin = 0, ymax = 1,
            inherit.aes = FALSE, fill = "grey80", alpha = 0.9) + ggtitle("(b) Recruitment Profile") + 
   geom_line() + xlab('Escapement (S)') +   theme(plot.title = element_text(size = 12, face = "bold"),
                                                  strip.text.y = element_text(size=0),legend.position= "none") +
@@ -180,7 +182,7 @@ cowplot::plot_grid(plot2, plot1,  align = "v", nrow = 2, ncol=1)
 ggsave("output/base_case/processed/resids_recruit.png", dpi = 500, height = 7, width = 8, units = "in")
 
 # create optimal yield plot
-read.csv("output/base_case/processed/Y.csv") -> df
+read.csv("output/base_case/processed/yield.csv") -> df
 get_two_nearest_bounds(df, "oy_0.9", 0.70)
 get_two_nearest_bounds(df, "oy_0.9", 0.75)
 get_two_nearest_bounds(df, "oy_0.9", 0.80)

@@ -24,7 +24,7 @@ theme_sleek <- function(base_size = 11, base_family = "") {
 
 # profile function----
 # this function created by Ben William (Ben.Williams@alaska.gov) and adapted by Sara Miller (Sara.Miller@alaska.gov)
-profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
+profile <-function(i,z,xa.start, xa.end,lnalpha.c, lnalpha, beta1, coda){
   xa = seq(xa.start, xa.end, by=i) 
   x =(xa+i)*z
   # empty dataframes
@@ -38,19 +38,21 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
   dat7 <- data.frame(S0=rep(0, length(coda[,1])))
   dat8 <- data.frame(S0=rep(0, length(coda[,1])))
   dat9 <- data.frame(S0=rep(0, length(coda[,1])))
-  dat10 <- data.frame(S0=rep(0, length(coda[,1])))
+  dat10 <- data.frame(S0=rep(0, length(coda[,1]))) # median
+  dat11 <- data.frame(S0=rep(0, length(coda[,1]))) #mean
   for (i in 1:length(xa)){
-    dat[,i+1] = ifelse((x[i] * exp(coda$lnalpha.c-coda$beta1*x[i])-x[i])>(0.7*coda$MSY.c), 0, ifelse(dat[,i]==0, 0,1))
-    dat1[,i+1] = ifelse((x[i] * exp(coda$lnalpha.c-coda$beta1*x[i])-x[i])>(0.7*coda$MSY.c), 1,0)
-    dat2[,i+1] = ifelse((x[i] * exp(coda$lnalpha.c-coda$beta1*x[i]))>(0.7*coda$Rmax), 1,0)
-    dat3[,i+1] = ifelse((x[i] * exp(coda$lnalpha.c-coda$beta1*x[i])-x[i])>(0.8*coda$MSY.c), 0, ifelse(dat3[,i]==0, 0,1))
-    dat4[,i+1] = ifelse((x[i] * exp(coda$lnalpha.c-coda$beta1*x[i])-x[i])>(0.8*coda$MSY.c), 1,0)
-    dat5[,i+1] = ifelse((x[i] * exp(coda$lnalpha.c-coda$beta1*x[i]))>(0.8*coda$Rmax), 1,0)
-    dat6[,i+1] = ifelse((x[i] * exp(coda$lnalpha.c-coda$beta1*x[i])-x[i])>(0.9*coda$MSY.c), 0, ifelse(dat6[,i]==0, 0,1))
-    dat7[,i+1] = ifelse((x[i] * exp(coda$lnalpha.c-coda$beta1*x[i])-x[i])>(0.9*coda$MSY.c), 1,0)
-    dat8[,i+1] = ifelse((x[i] * exp(coda$lnalpha.c-coda$beta1*x[i]))>(0.9*coda$Rmax), 1,0)
-    dat9[,i+1] = x[i]*exp(coda$lnalpha.c-coda$beta1*x[i])-x[i] #expected yield
-    dat10[,i+1] = x[i]*exp(coda$lnalpha.c-coda$beta1*x[i]) # CI around S
+    dat[,i+1] = ifelse((x[i] * exp(coda$lnalpha-coda$beta1*x[i])-x[i])>(0.7*coda$MSY), 0, ifelse(dat[,i]==0, 0,1))
+    dat1[,i+1] = ifelse((x[i] * exp(coda$lnalpha-coda$beta1*x[i])-x[i])>(0.7*coda$MSY), 1,0)
+    dat2[,i+1] = ifelse((x[i] * exp(coda$lnalpha-coda$beta1*x[i]))>(0.7*coda$Rmax), 1,0)
+    dat3[,i+1] = ifelse((x[i] * exp(coda$lnalpha-coda$beta1*x[i])-x[i])>(0.8*coda$MSY), 0, ifelse(dat3[,i]==0, 0,1))
+    dat4[,i+1] = ifelse((x[i] * exp(coda$lnalpha-coda$beta1*x[i])-x[i])>(0.8*coda$MSY), 1,0)
+    dat5[,i+1] = ifelse((x[i] * exp(coda$lnalpha-coda$beta1*x[i]))>(0.8*coda$Rmax), 1,0)
+    dat6[,i+1] = ifelse((x[i] * exp(coda$lnalpha-coda$beta1*x[i])-x[i])>(0.9*coda$MSY), 0, ifelse(dat6[,i]==0, 0,1))
+    dat7[,i+1] = ifelse((x[i] * exp(coda$lnalpha-coda$beta1*x[i])-x[i])>(0.9*coda$MSY), 1,0)
+    dat8[,i+1] = ifelse((x[i] * exp(coda$lnalpha-coda$beta1*x[i]))>(0.9*coda$Rmax), 1,0)
+    dat9[,i+1] = x[i]*exp(coda$lnalpha-coda$beta1*x[i])-x[i] #expected yield
+    dat10[,i+1] = x[i]*exp(coda$lnalpha-coda$beta1*x[i]) # mean
+    dat11[,i+1] = x[i]*exp(coda$lnalpha.c-coda$beta1*x[i])# mean
   }
   # Overfishing estimate ----
   f.over <- function(x){
@@ -100,7 +102,7 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
   write.csv(qm,("output/base_case/processed/QM.csv"), row.names=FALSE)
   write.csv(yield,("output/base_case/processed/yield.csv"), row.names=FALSE)
   
-  # confidence intervals ----
+  # confidence intervals (median)----
   dat10 %>%
     summarise_all(funs(median = median, 
                        q95=quantile(., 0.95, na.rm=T), 
@@ -116,7 +118,28 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, beta1, coda){
   CI <- data.frame(measure = names(mq), value = as.numeric(mq[1,]), Escapement=rep(c(0,x), length(unique(names(mq)))))
   CI <- spread(CI, measure, value)
   CI <- CI[c("q95", "q90", "Median","q10", "q5", "Escapement")]
-  write.csv(CI,("output/base_case/processed/CI.csv"), row.names=FALSE)
+  write.csv(CI,("output/base_case/processed/CI_median.csv"), row.names=FALSE)
+  
+  # confidence intervals (mean)----
+  dat11 %>%
+    summarise_all(funs(median = median, 
+                       q95=quantile(., 0.95, na.rm=T), 
+                       q90=quantile(., 0.90, na.rm=T),
+                       q10=quantile(., 0.10, na.rm=T),
+                       q5=quantile(., 0.05, na.rm=T))) -> mq
+  names(mq) <- c(rep(('Median'),length(x)+1), 
+                 rep(('q95'),length(x)+1), 
+                 rep(('q90'),length(x)+1), 
+                 rep(('q10'),length(x)+1), 
+                 rep(('q5'),length(x)+1))
+  
+  CI <- data.frame(measure = names(mq), value = as.numeric(mq[1,]), Escapement=rep(c(0,x), length(unique(names(mq)))))
+  CI <- spread(CI, measure, value)
+  CI <- CI[c("q95", "q90", "Median","q10", "q5", "Escapement")]
+  write.csv(CI,("output/base_case/processed/CI_mean.csv"), row.names=FALSE)
+  
+  
+  # yield data
   read.csv("output/base_case/processed/yield.csv") -> yield 
   
   yield %>% 
