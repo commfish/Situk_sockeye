@@ -95,6 +95,7 @@ coda <- as.data.frame(post.arr[, parameters, ]) %>%
 # alpha
     alpha = exp(lnalpha),
     alpha.c   = exp(lnalpha.c),
+
 # Smsy - spawners at maximum sustainable yield
 Smsy_lambert   = (10^d) * (1 - lambert_W0(exp(1 - lnalpha)))   / beta,
 Smsy_lambert.c = (10^d) * (1 - lambert_W0(exp(1 - lnalpha.c))) / beta,

@@ -1,7 +1,7 @@
 # R CODE TO CREATE PROFILES DATA AND FIGURES (Horsetail plots, age comp, maturity at age,
 # point estimate plots, yield plots)
-lower_bounds <- 33700 #lower bound of recommended escapement goal range (update)
-upper_bounds <- 59400 #upper bound of recommended escapement goal range (update)
+lower_bounds <- 33800 #lower bound of recommended escapement goal range (update)
+upper_bounds <- 59200 #upper bound of recommended escapement goal range (update)
 
 stat_quants <- read.csv(file= paste0(out.path,"/statsquants.csv"))
 quant_lambert <- read.csv(file= paste0(out.path,"/quantiles_lambert.csv")) 
