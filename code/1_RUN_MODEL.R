@@ -31,7 +31,7 @@ library(gridExtra)
 # "explore" version takes ~10min with the current settings.
 out.label <-  "base_case"  # label to be used for the output folder (and for scenario comparisons)
 package.use <- "rjags"  
-jags.settings <- "explore"  # "test" or "explore" or full" 
+jags.settings <- "full"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
 # load custom functions
