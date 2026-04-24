@@ -213,4 +213,17 @@ get_two_nearest_bounds <- function(tbl, column, target) {
     upper = max(vals)
   )
 }
+# ACF function
+acf_param <- function(post, param, combine = FALSE){
+  chains <- lapply(post, function(x) as.numeric(x[, param]))
+  
+  if(combine){
+    acf(unlist(chains), main = paste("ACF", param, "(combined chains)"))
+  } else {
+    par(mfrow = c(1, length(chains)))
+    for(i in seq_along(chains)){
+      acf(chains[[i]], main = paste("ACF", param, "- Chain", i))
+    }
+  }
+}
 

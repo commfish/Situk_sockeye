@@ -22,6 +22,8 @@ devtools::install_github("commfish/fngr")
 library(fngr)
 library(extrafont)
 library(runjags)
+library(grid)
+library(gridExtra)
 
 # STEP 1: CHOOSE SETTINGS----
 
@@ -29,7 +31,7 @@ library(runjags)
 # "explore" version takes ~10min with the current settings.
 out.label <-  "base_case"  # label to be used for the output folder (and for scenario comparisons)
 package.use <- "rjags"  
-jags.settings <- "full"  # "test" or "explore" or full" 
+jags.settings <- "explore"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
 # load custom functions
@@ -74,7 +76,7 @@ source("code/model_inits.R")
 start.jags <- proc.time()
 sw.randomseed <- 200
 if(package.use == "rjags" & sensitivity.analysis == 0){
-  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0")
+  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0", "e")
   
   jmod <- rjags::jags.model(
     file='code/Situk_sockeye.txt', 
@@ -95,4 +97,6 @@ if(package.use == "rjags" & sensitivity.analysis == 0){
   print("Output Processing took")
   print(end.output - end.jags)
 }
+
+
 

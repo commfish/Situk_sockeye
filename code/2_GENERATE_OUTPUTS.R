@@ -320,3 +320,21 @@ write.csv(out, file = "output/base_case/processed/recruit_data.csv", row.names =
 read.csv("output/base_case/quantiles_lambert.csv") %>%
   dplyr::select(variable, X2.5, X50, X97.5, post_cv) %>%
   write.csv(., file = "output/base_case/processed/params.csv", row.names = FALSE)
+
+# ACF plots
+pdf("output/base_case/ACF_parameters.pdf", width = 7, height = 5)
+for(p in parameters){
+  acf_param(post, p, combine = TRUE)
+}
+
+dev.off()
+
+# ACF values
+post_mat <- as.matrix(post)
+
+e_cols <- grep("e[", colnames(post_mat), fixed = TRUE, value = TRUE)
+e_mean <- colMeans(post_mat[, e_cols])
+
+acf_e <- acf(e_mean, plot = FALSE)
+
+data.frame(lag = as.numeric(acf_e$lag),acf = as.numeric(acf_e$acf))
