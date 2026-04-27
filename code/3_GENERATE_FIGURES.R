@@ -37,13 +37,18 @@ if(!dir.exists(file.path("output", "base_case", "processed"))){dir.create(file.p
 # data----
 read.csv("data/Situk_sockeye.csv") %>%
   mutate(yield = (recruit50 - spawn)) -> spawnrecruitdat
+read.csv("data/Situk_sockeye_historic.csv") -> spawnrecruitdat_historic
+points_all <- dplyr::bind_rows(
+  spawnrecruitdat  |> dplyr::mutate(Group = "Recent"),
+  spawnrecruitdat_historic |> dplyr::mutate(Group = "Historic"))
+
 read.csv(file = paste0(out.path,"/coda.csv")) -> coda
 read.csv("output/base_case/processed/recruit_data.csv") -> recruit
 
 # analysis----
 # function for probability profiles and figures
 #profile(i = 10, z = 50, xa.start = 0, xa.end = 8000, lnalpha.c, beta1, coda) # can change i,z, xa.start, xa.end 
-profile(i = 5, z = 20, xa.start = 0, xa.end = 20000, lnalpha.c, lnalpha, beta1, coda) # can change i,z, xa.start, xa.end 
+#profile(i = 5, z = 20, xa.start = 0, xa.end = 20000, lnalpha.c, lnalpha, beta1, coda) # can change i,z, xa.start, xa.end 
 QM <- read.csv("output/base_case/processed/QM.csv")
 CI_median <- read.csv("output/base_case/processed/CI_median.csv")
 CI_mean <- read.csv("output/base_case/processed/CI_mean.csv")
@@ -65,6 +70,27 @@ ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
   geom_text(size=3, data=spawnrecruitdat, aes(x=spawn, y=recruit50, label = year,family="Times",
                                              hjust = -0.1, vjust= -0.4))
 ggsave("output/base_case/processed/horsetail.png", dpi = 500, height = 6, width = 8, units = "in")
+
+# horsetail (spawner recruit) plots
+ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
+  geom_line(size=0.75, lty=1) +
+  geom_ribbon(aes(ymin = q5, ymax = q95), alpha=.1) +
+  geom_ribbon(aes(ymin = q10, ymax = q90), alpha=.2) +
+  geom_line(data = CI_mean, aes(x = Escapement, y = Median), size=0.75, lty=2) + 
+  xlab("Spawners (S)") +
+  ylab("Recruits (R)") +
+  #geom_vline(xintercept = SMSY, color ="gray70", lty=2) +
+  scale_y_continuous(labels = comma,breaks = seq(0, 300000, 50000), limits = c(0, 300000)) +
+  scale_x_continuous(labels = comma,breaks = seq(0, 250000, 50000), limits = c(0, 250000)) +
+  geom_line(data = CI_median, aes(x = Escapement, y =Escapement),linetype="solid", size=0.75, color ="grey60") +
+  geom_point(data = points_all, aes(x = spawn, y = recruit50, shape = Group),size = 2) +
+  scale_shape_manual(values = c("Recent" = 1, "Historic" = 16)) +
+  theme(text=element_text(size=14),
+        panel.grid.minor = element_blank(),
+        legend.position = c(0.80, 0.85),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 11))
+ggsave("output/base_case/processed/horsetail_historic.png", dpi = 500, height = 6, width = 8, units = "in")
 
 # expected yield plot
 ggplot(QM, aes(Escapement, Median))+geom_line(size=1)+
