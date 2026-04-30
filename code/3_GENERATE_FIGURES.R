@@ -71,7 +71,7 @@ ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
                                              hjust = -0.1, vjust= -0.4))
 ggsave("output/base_case/processed/horsetail.png", dpi = 500, height = 6, width = 8, units = "in")
 
-# horsetail (spawner recruit) plots
+# horsetail (spawner recruit) historic plots
 ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
   geom_line(size=0.75, lty=1) +
   geom_ribbon(aes(ymin = q5, ymax = q95), alpha=.1) +
@@ -89,7 +89,7 @@ ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
         panel.grid.minor = element_blank(),
         legend.position = c(0.80, 0.85),
         legend.title = element_blank(),
-        legend.text = element_text(size = 11))
+        legend.text = element_text(size = 16))
 ggsave("output/base_case/processed/horsetail_historic.png", dpi = 500, height = 6, width = 8, units = "in")
 
 # expected yield plot
