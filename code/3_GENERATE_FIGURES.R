@@ -150,7 +150,7 @@ ggsave("output/base_case/processed/yield_profiles.png", dpi = 500, height = 7, w
 tickryr <- data.frame(Year = 1976:2020)
 xaxis <- fngr::tickr(tickryr, Year, 4)
 recruit <- read.csv("output/base_case/processed/recruit_data.csv") %>%
-  dplyr::select(RD2.1:RD2.43)
+  dplyr::select(RD.1:RD.43)# RD2s is AR1 model and RDs is the basic Ricker model
 
 names(recruit) <- as.character(1976:2018)
 
@@ -174,7 +174,7 @@ ggplot(., aes(year, average))+geom_line(linewidth=1) + geom_point(size=3)+
 
 # predicted plot (recruits)
 recruit <- read.csv("output/base_case/processed/recruit_data.csv") %>%
-  dplyr::select(RD2.1:RD2.43)
+  dplyr::select(RD.1:RD.43) # RD2s is AR1 model and RDs is the basic Ricker model
 
 names(recruit) <- as.character(1976:2018)
 
@@ -201,8 +201,8 @@ ggplot(aes(year, R.m)) +
   geom_point(aes(x = year, y = logR), pch = 1, size = 3) +
   xlab("Year") + ylab("ln(Recruits)") +
   scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1976, 2020)) +
-  scale_y_continuous(labels = comma, breaks = seq(10, 15, 0.5), limits = c(10, 15)) +
-  annotate("text", x = 1976, y = 14.8, label = "a)", family = "Times", size = 6) +
+  scale_y_continuous(labels = comma, breaks = seq(10, 13, 0.5), limits = c(10, 13)) +
+  annotate("text", x = 1976, y = 13, label = "a)", family = "Times", size = 6) +
   theme(axis.text.x = element_text(size = 10)) -> plot2
 cowplot::plot_grid(plot2, plot1,  align = "v", nrow = 2, ncol=1)
 ggsave("output/base_case/processed/resids_recruit.png", dpi = 500, height = 7, width = 8, units = "in")
