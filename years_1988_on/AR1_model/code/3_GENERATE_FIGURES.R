@@ -1,21 +1,5 @@
 # R CODE TO CREATE PROFILES DATA AND FIGURES (Horsetail plots, age comp, maturity at age,
 # point estimate plots, yield plots)
-lower_bounds <- 33200 #lower bound of recommended escapement goal range (update)
-upper_bounds <- 59300 #upper bound of recommended escapement goal range (update)
-
-stat_quants <- read.csv(file= paste0(out.path,"/statsquants.csv"))
-quant_lambert <- read.csv(file= paste0(out.path,"/quantiles_lambert.csv")) 
-
-lnalpha <- stat_quants[stat_quants$variable == "lnalpha", "X50."]
-lnalpha.c <- stat_quants[stat_quants$variable == "lnalpha.c", "X50."]
-beta <- stat_quants[stat_quants$variable == "beta", "X50."]
-beta1 <- beta*10^-4
-
-SMSY <- quant_lambert[quant_lambert$variable == "Smsy_lambert", "X50"]
-UMSY <- quant_lambert[quant_lambert$variable == "Umsy_lambert", "X50"]
-SMAX <- quant_lambert[quant_lambert$variable == "Smax", "X50"] 
-SEQ  <- quant_lambert[quant_lambert$variable == "Seq", "X50"]
-
 # load----
 library(plyr)
 library(tidyverse)
@@ -32,7 +16,22 @@ windowsFonts(Times=windowsFont("TT Times New Roman"))
 theme_set(theme_report(base_size = 14))
 source("years_1988_on/AR1_model/code/functions.R")
 
-if(!dir.exists(file.path("years_1988_on", "AR1_model", "output", "processed"))){dir.create(file.path("years_1988_on", "AR1_model", "output", "processed"))}
+out.path <- paste0("years_1988_on/AR1_model")
+lower_bounds <- 33200 #lower bound of recommended escapement goal range (update)
+upper_bounds <- 59300 #upper bound of recommended escapement goal range (update)
+
+stat_quants <- read.csv(file= paste0(out.path,"/output/statsquants.csv"))
+quant_lambert <- read.csv(file= paste0(out.path,"/output/quantiles_lambert.csv")) 
+
+lnalpha <- stat_quants[stat_quants$variable == "lnalpha", "X50."]
+lnalpha.c <- stat_quants[stat_quants$variable == "lnalpha.c", "X50."]
+beta <- stat_quants[stat_quants$variable == "beta", "X50."]
+beta1 <- beta*10^-4
+
+SMSY <- quant_lambert[quant_lambert$variable == "Smsy_lambert", "X50"]
+UMSY <- quant_lambert[quant_lambert$variable == "Umsy_lambert", "X50"]
+SMAX <- quant_lambert[quant_lambert$variable == "Smax", "X50"] 
+SEQ  <- quant_lambert[quant_lambert$variable == "Seq", "X50"]
 
 # data----
 read.csv("data/Situk_sockeye.csv") %>%
@@ -44,18 +43,18 @@ points_all <- dplyr::bind_rows(
   spawnrecruitdat  |> dplyr::mutate(Group = "Recent"),
   spawnrecruitdat_historic |> dplyr::mutate(Group = "Historic"))
 
-read.csv(file = paste0(out.path,"/coda.csv")) -> coda
-read.csv("years_1988_on/AR1_model/output/processed/recruit_data.csv") -> recruit
+read.csv(file = paste0(out.path,"/output/coda.csv")) -> coda
+read.csv(file = paste0(out.path,"/output/processed/recruit_data.csv")) -> recruit
 
 # analysis----
 # function for probability profiles and figures
-#profile(i = 10, z = 50, xa.start = 0, xa.end = 8000, lnalpha.c, beta1, coda) # can change i,z, xa.start, xa.end 
 profile(i = 5, z = 20, xa.start = 0, xa.end = 20000, lnalpha.c, lnalpha, beta1, coda) # can change i,z, xa.start, xa.end 
-QM <- read.csv("years_1988_on/AR1_model/output/processed/QM.csv")
-CI_median <- read.csv("years_1988_on/AR1_model/output/processed/CI_median.csv")
-CI_mean <- read.csv("years_1988_on/AR1_model/output/processed/CI_mean.csv")
+read.csv(file = paste0(out.path,"/output/processed/QM.csv")) -> QM
+read.csv(file = paste0(out.path,"/output/processed/CI_median.csv")) -> CI_median
+read.csv(file = paste0(out.path,"/output/processed/CI_mean.csv")) -> CI_mean
 
 # horsetail (spawner recruit) plots
+out.file <- paste0(out.path, "/output/processed/horsetail.png")
 ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
   geom_line(size=0.75, lty=1) +
   geom_ribbon(aes(ymin = q5, ymax = q95), alpha=.1) +
@@ -63,17 +62,17 @@ ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
   geom_line(data = CI_mean, aes(x = Escapement, y = Median), size=0.75, lty=2) + 
   xlab("Spawners (S)") +
   ylab("Recruits (R)") +
-  #geom_vline(xintercept = SMSY, color ="gray70", lty=2) +
   scale_y_continuous(labels = comma,breaks = seq(0, 300000, 50000), limits = c(0, 300000)) +
   scale_x_continuous(labels = comma,breaks = seq(0, 250000, 50000), limits = c(0, 250000)) +
-  geom_line(data = CI_median, aes(x = Escapement, y =Escapement),linetype="solid", size=0.75, color ="grey60") +
-  geom_point(data = spawnrecruitdat, aes(x=spawn, y=recruit50),pch=1, size=2) + 
+  geom_line(data = CI_median, aes(x = Escapement, y = Escapement),linetype="solid", size=0.75, color ="grey60") +
+  geom_point(data = spawnrecruitdat, aes(x = spawn, y = recruit50),pch=1, size=2) + 
   theme(text=element_text(size=14)) +
   geom_text(size=3, data=spawnrecruitdat, aes(x=spawn, y=recruit50, label = year,family="Times",
-                                             hjust = -0.1, vjust= -0.4))
-ggsave("years_1988_on/AR1_model/output/processed/horsetail.png", dpi = 500, height = 6, width = 8, units = "in")
+                                              hjust = -0.1, vjust= -0.4))
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 # horsetail (spawner recruit) historic plots
+out.file <- paste0(out.path, "/output/processed/horsetail_historic.png")
 ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
   geom_line(size=0.75, lty=1) +
   geom_ribbon(aes(ymin = q5, ymax = q95), alpha=.1) +
@@ -81,7 +80,6 @@ ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
   geom_line(data = CI_mean, aes(x = Escapement, y = Median), size=0.75, lty=2) + 
   xlab("Spawners (S)") +
   ylab("Recruits (R)") +
-  #geom_vline(xintercept = SMSY, color ="gray70", lty=2) +
   scale_y_continuous(labels = comma,breaks = seq(0, 300000, 50000), limits = c(0, 300000)) +
   scale_x_continuous(labels = comma,breaks = seq(0, 250000, 50000), limits = c(0, 250000)) +
   geom_line(data = CI_median, aes(x = Escapement, y =Escapement),linetype="solid", size=0.75, color ="grey60") +
@@ -92,9 +90,10 @@ ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
         legend.position = c(0.80, 0.85),
         legend.title = element_blank(),
         legend.text = element_text(size = 16))
-ggsave("years_1988_on/AR1_model/output/processed/horsetail_historic.png", dpi = 500, height = 6, width = 8, units = "in")
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 # expected yield plot
+out.file <- paste0(out.path, "/output/processed/expected_yield.png")
 ggplot(QM, aes(Escapement, Median))+geom_line(size=1)+
   geom_ribbon(aes(ymin = q5, ymax = q95), alpha=.15)+
   geom_ribbon(aes(ymin = q10, ymax = q90), alpha=.15)+ xlab("Escapement")+
@@ -102,10 +101,10 @@ ggplot(QM, aes(Escapement, Median))+geom_line(size=1)+
   scale_x_continuous(labels = comma,breaks = seq(0, 250000, 50000), limits = c(0,250000))+
   scale_y_continuous(labels = comma,breaks = seq(-200000, 200000, 50000), limits = c(-200000,200000))+
   geom_hline(yintercept = 0, lty = 2, col = "grey10") + geom_point(data=spawnrecruitdat, aes(x=spawn, y=yield),pch=16, size = 2) 
-ggsave("years_1988_on/AR1_model/output/processed/expected_yield.png", dpi = 500, height = 6, width = 8, units = "in")
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 # yield profiles 
-read.csv("years_1988_on/AR1_model/output/processed/optimal_yield_data.csv") %>%
+read.csv(file = paste0(out.path,"/output/processed/optimal_yield_data.csv")) %>%
   filter(max_pct == 0.9) -> optimal_yield_data
 
 optimal_yield_data %>%
@@ -116,7 +115,7 @@ optimal_yield_data %>%
 
 optimal_yield_data %>%
   filter(sra == "Recruitment Profile") -> fig_data3
-
+out.file <- paste0(out.path, "/output/processed/yield_profiles.png")
 ggplot(fig_data1, aes(x = Escapement, y = Probability)) + ggtitle("(c) Yield Profile") + 
   annotate("rect", xmin = lower_bounds, xmax = upper_bounds, ymin = 0, ymax = 1,
            inherit.aes = FALSE, fill = "grey80", alpha = 0.9) +
@@ -146,15 +145,15 @@ ggplot(fig_data3, aes(x = Escapement, y = Probability)) +
   scale_linetype_discrete(name = "Percent of Max.") +
   facet_grid(sra ~ .)  -> plot3
 cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
-ggsave("years_1988_on/AR1_model/output/processed/yield_profiles.png", dpi = 500, height = 7, width = 6, units = "in")
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 # residual plot 
-tickryr <- data.frame(Year = 1988:2020)
+tickryr <- data.frame(Year = 1976:2020)
 xaxis <- fngr::tickr(tickryr, Year, 4)
-recruit <- read.csv("years_1988_on/AR1_model/output/processed/recruit_data.csv") %>%
+recruit <- read.csv(file = paste0(out.path,"/output/processed/recruit_data.csv")) %>%
   dplyr::select(RD2.1:RD2.43)# RD2s is AR1 model and RDs is the basic Ricker model
 
-names(recruit) <- as.character(1988:2018)
+names(recruit) <- as.character(1976:2018)
 
 resid_summary <- recruit %>%
   pivot_longer(cols = everything(), names_to = "year", values_to = "resid") %>%
@@ -167,18 +166,18 @@ resid_summary <- recruit %>%
   ungroup() %>%
   as.data.frame() %>%
   mutate(year = as.numeric(year)) %>%
-ggplot(., aes(year, average))+geom_line(linewidth=1) + geom_point(size=3)+
+  ggplot(., aes(year, average))+geom_line(linewidth=1) + geom_point(size=3)+
   geom_ribbon(aes(ymin = cil, ymax = ciu), alpha=.15)+ xlab("Year")+ylab("Residuals")+
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1988, 2020))+
-  annotate("text",x = 1988, y=1.96, label="b)", family="Times" ,size=6) +theme (axis.text.x=element_text (size=10)) +
+  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1976, 2020))+
+  annotate("text",x = 1976, y=1.96, label="b)", family="Times" ,size=6) +theme (axis.text.x=element_text (size=10)) +
   scale_y_continuous(labels = comma,breaks = seq(-2, 2, 0.5), limits = c(-2,2))+
   geom_hline(yintercept = 0, color = "grey70", lty = 2) -> plot1
 
 # predicted plot (recruits)
-recruit <- read.csv("years_1988_on/AR1_model/output/processed/recruit_data.csv") %>%
+recruit <- read.csv(file = paste0(out.path,"/output/processed/recruit_data.csv")) %>%
   dplyr::select(RD2.1:RD2.43) # RD2s is AR1 model and RDs is the basic Ricker model
 
-names(recruit) <- as.character(1988:2018)
+names(recruit) <- as.character(1976:2018)
 
 recruit %>%
   pivot_longer(cols = everything(), names_to = "year", values_to = "resid") %>%
@@ -197,20 +196,21 @@ recruit %>%
     R.m   = logR - average,
     upper = logR - ciu,
     lower = logR - cil) %>%
-ggplot(aes(year, R.m)) +
+  ggplot(aes(year, R.m)) +
   geom_line(linewidth = 1) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.15) +
   geom_point(aes(x = year, y = logR), pch = 1, size = 3) +
   xlab("Year") + ylab("ln(Recruits)") +
-  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1988, 2020)) +
+  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1976, 2020)) +
   scale_y_continuous(labels = comma, breaks = seq(10, 13, 0.5), limits = c(10, 13)) +
-  annotate("text", x = 1988, y = 13, label = "a)", family = "Times", size = 6) +
+  annotate("text", x = 1976, y = 13, label = "a)", family = "Times", size = 6) +
   theme(axis.text.x = element_text(size = 10)) -> plot2
 cowplot::plot_grid(plot2, plot1,  align = "v", nrow = 2, ncol=1)
-ggsave("years_1988_on/AR1_model/output/processed/resids_recruit.png", dpi = 500, height = 7, width = 8, units = "in")
+out.file <- paste0(out.path, "/output/processed/resids_recruit.png")
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
 # create optimal yield plot
-read.csv("years_1988_on/AR1_model/output/processed/yield.csv") -> df
+read.csv(file = paste0(out.path,"/output/processed/yield.csv")) -> df
 get_two_nearest_bounds(df, "oy_0.9", 0.70)
 get_two_nearest_bounds(df, "oy_0.9", 0.75)
 get_two_nearest_bounds(df, "oy_0.9", 0.80)

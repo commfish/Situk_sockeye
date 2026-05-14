@@ -9,14 +9,14 @@
 d <- 4
 windowsFonts(Times=windowsFont("Arial"))
 theme_set(theme_sleek())
-out.path <- paste0("years_1988_on/basic_Ricker_model/output")
+out.path <- paste0("years_1988_on/basic_Ricker_model")
 parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0")
 
 # Numerical summary of each parameter (mean, median, quantiles of posteriors)----
 # https://stats.stackexchange.com/questions/429470/what-is-the-correct-effective-sample-size-ess-calculation
 coda::effectiveSize(post) %>%
   as.data.frame %>%
-  write.csv(., file= paste0(out.path,"/effectiveN.csv")) 
+  write.csv(., file= paste0(out.path,"/output/effectiveN.csv")) 
 
 summary <- summary(post)  
 stats<-summary$statistics;  colnames(stats)
@@ -28,7 +28,7 @@ cbind(stats,quants) %>%
   rownames_to_column('variable') %>%
   mutate (mc_error = time_series_se/SD,
           converge = ifelse(mc_error < 0.05, "true", "false")) %>%
-  write.csv(., file= paste0(out.path,"/statsquants.csv"))    
+  write.csv(., file= paste0(out.path,"/output/statsquants.csv"))    
 
 # Gelman Diagnostics----
 poor.threshold <- 1.01  # R-hat < 1.01 = converged
@@ -39,7 +39,7 @@ gel_df <- gelman.diag(post, multivariate = FALSE)[[1]] %>%
   dplyr::rename(point_estimate = `Point est.`) %>%
   dplyr::mutate(converge = ifelse(point_estimate < poor.threshold, "true", "false"))
 
-write.csv(gel_df, file = file.path(out.path, "gelman.csv"), row.names = FALSE)
+write.csv(gel_df, file = file.path(out.path, "/output/gelman.csv"), row.names = FALSE)
 
 # Geweke Diagnostics----
 #Examine convergence of the Markov chains using the Geweke's convergence diagnostic
@@ -59,9 +59,9 @@ rownames(geweke_df) <- NULL
 
 geweke_df <- dplyr::relocate(geweke_df, variable)
 colnames(geweke_df)[2:ncol(geweke_df)] <- paste0("chain", seq_len(ncol(geweke_df) - 1))
-write.csv(geweke_df, paste0(out.path,"/geweke.csv")) 
+write.csv(geweke_df, paste0(out.path,"/output/geweke.csv")) 
 
-pdf(file = file.path(out.path, "geweke.pdf"), height = 10, width = 8)
+pdf(file = file.path(out.path, "output/geweke.pdf"), height = 10, width = 8)
 geweke.plot(post)
 dev.off()
 
@@ -74,7 +74,7 @@ get_quant <- function(parameters) {
 
 quant_table <- do.call(rbind, lapply(parameters, get_quant))
 
-write.csv(quant_table, paste0(out.path, "/percentiles.csv"), row.names = FALSE)
+write.csv(quant_table, paste0(out.path, "/output/percentiles.csv"), row.names = FALSE)
 
 # lambert calc----
 # Extract parameters from posterior array
@@ -123,7 +123,7 @@ coda <- as.data.frame(post.arr[, parameters, ]) %>%
     Rmax   = exp(lnalpha)   * (1 / beta1) * exp(-1)) %>%
   as.data.frame()
 
-write.csv(coda, file= paste0(out.path,"/coda.csv") ,row.names=FALSE)  
+write.csv(coda, file= paste0(out.path,"/output/coda.csv") ,row.names=FALSE)  
 
 qtab <- apply(coda, 2, quantile, #quantiles
               probs = c(0, 0.025, 0.05, 0.5, 0.95, 0.975, 1)) %>%
@@ -151,7 +151,7 @@ names(x) <- c("variable","0","2.5","5","50","95","97.5","100","mean","sd")
 x %>%
   mutate(across(-variable, ~as.numeric(.))) %>%
   mutate(post_cv = sd/mean) %>%
-  write.csv(., file= paste0(out.path,"/quantiles_lambert.csv"))    
+  write.csv(., file= paste0(out.path,"/output/quantiles_lambert.csv"))    
 
 # lambert density plot setup----
 post_mat <- as.matrix(post)
@@ -168,7 +168,7 @@ df1 <- data.frame(Smsy = Smsy)
 df2 <- data.frame(Umsy = Umsy)
 
 # lambert density plots----
-out.file <- paste0(out.path, "/density.png")
+out.file <- paste0(out.path, "/output/density.png")
 theme_set(theme_bw(base_size = 14, base_family = "Arial"))
 
 plot1 <- ggplot(df1, aes(x = Smsy)) +
@@ -220,7 +220,7 @@ post_df <- as.data.frame(as.mcmc(do.call(rbind, post))) %>%
     names_to = "parameter",
     values_to = "value")
 
-out.file <- paste0(out.path, "/posterior_densities.png")
+out.file <- paste0(out.path, "/output/posterior_densities.png")
 ggplot(post_df, aes(x = value)) +
   geom_density(fill = "steelblue", alpha = 0.4, color = "black") +
   facet_wrap(~ parameter, scales = "free", ncol = 3) +
@@ -238,7 +238,7 @@ df_trace <- as.data.frame.table(post.arr, responseName = "value") %>%
   mutate(
     iter  = as.numeric(iter),
     chain = as.factor(chain))
-out.file <- paste0(out.path, "/trace_plots.png")
+out.file <- paste0(out.path, "/output/trace_plots.png")
 ggplot(df_trace, aes(x = iter, y = value, color = chain)) +
   geom_line(alpha = 0.7, linewidth = 0.4) +
   facet_wrap(~ var, scales = "free_y") +
@@ -249,7 +249,7 @@ ggplot(df_trace, aes(x = iter, y = value, color = chain)) +
     legend.position = "bottom")
 ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 
-out.file <- paste0(out.path, "/dens_plots.png")
+out.file <- paste0(out.path, "/output/dens_plots.png")
 dens_plot <- ggplot(df_trace, aes(value, fill = chain)) +
   geom_density(alpha = 0.4) +
   facet_wrap(~ var, scales = "free") +
@@ -315,15 +315,15 @@ names(RD2_df) <- paste0("RD2.", 1:n_years)
 # Combine and write to CSV
 
 out <- cbind(RD_df, RD2_df)
-write.csv(out, paste0(out.path, "/processed/recruit_data.csv"), row.names = FALSE)
+write.csv(out, paste0(out.path, "/output/processed/recruit_data.csv"), row.names = FALSE)
 
 # create param table
-read.csv(file.path(out.path, "/quantiles_lambert.csv")) %>%
+read.csv(file.path(out.path, "/output/quantiles_lambert.csv")) %>%
   dplyr::select(variable, X2.5, X50, X97.5, post_cv) %>%
-  write.csv(., paste0(out.path, "/processed/params.csv"), row.names = FALSE)
+  write.csv(., paste0(out.path, "/output/processed/params.csv"), row.names = FALSE)
 
 # ACF plots
-pdf(file = file.path(out.path, "ACF_parameters.pdf"), height = 5, width = 7)
+pdf(file = file.path(out.path, "output/ACF_parameters.pdf"), height = 5, width = 7)
 for(p in parameters){
   acf_param(post, p, combine = TRUE)
 }
