@@ -61,7 +61,7 @@ geweke_df <- dplyr::relocate(geweke_df, variable)
 colnames(geweke_df)[2:ncol(geweke_df)] <- paste0("chain", seq_len(ncol(geweke_df) - 1))
 write.csv(geweke_df, paste0(out.path,"/geweke.csv")) 
 
-pdf("years_1988_on/AR1_model/output/geweke.pdf",height=10, width=8,onefile=T)
+pdf(file = file.path(out.path, "geweke.pdf"), height = 10, width = 8)
 geweke.plot(post)
 dev.off()
 
@@ -92,35 +92,35 @@ coda <- as.data.frame(post.arr[, parameters, ]) %>%
   mutate(
     beta1 = beta * 10^-4,
     
-# alpha
+    # alpha
     alpha = exp(lnalpha),
     alpha.c   = exp(lnalpha.c),
-
-# Smsy - spawners at maximum sustainable yield
-Smsy_lambert   = (10^d) * (1 - lambert_W0(exp(1 - lnalpha)))   / beta,
-Smsy_lambert.c = (10^d) * (1 - lambert_W0(exp(1 - lnalpha.c))) / beta,
-
-# Umsy - exploitation rate at MSY
-Umsy_lambert   = Smsy_lambert   * beta / (10^d),
-Umsy_lambert.c = Smsy_lambert.c * beta / (10^d),  
-
-# Smax - spawners at maximum recruitment
-Smax = (10^d) / beta,
     
-# Rmsy - recruits at MSY
-Rmsy.c = Smsy_lambert.c * exp(lnalpha.c - beta1 * Smsy_lambert.c),
-Rmsy   = Smsy_lambert   * exp(lnalpha   - beta1 * Smsy_lambert),
- 
-# Seq - equilibrium spawner abundance
-Seq   = lnalpha / beta1,
-
-# MSY - maximum sustainable yield
-MSY   = Rmsy   - Smsy_lambert,
-MSY.c   = Rmsy.c   - Smsy_lambert.c,    
-
-# Rmax - maximum recruitment
-Rmax.c = exp(lnalpha.c) * (1 / beta1) * exp(-1),
-Rmax   = exp(lnalpha)   * (1 / beta1) * exp(-1)) %>%
+    # Smsy - spawners at maximum sustainable yield
+    Smsy_lambert   = (10^d) * (1 - lambert_W0(exp(1 - lnalpha)))   / beta,
+    Smsy_lambert.c = (10^d) * (1 - lambert_W0(exp(1 - lnalpha.c))) / beta,
+    
+    # Umsy - exploitation rate at MSY
+    Umsy_lambert   = Smsy_lambert   * beta / (10^d),
+    Umsy_lambert.c = Smsy_lambert.c * beta / (10^d),  
+    
+    # Smax - spawners at maximum recruitment
+    Smax = (10^d) / beta,
+    
+    # Rmsy - recruits at MSY
+    Rmsy.c = Smsy_lambert.c * exp(lnalpha.c - beta1 * Smsy_lambert.c),
+    Rmsy   = Smsy_lambert   * exp(lnalpha   - beta1 * Smsy_lambert),
+    
+    # Seq - equilibrium spawner abundance
+    Seq   = lnalpha / beta1,
+    
+    # MSY - maximum sustainable yield
+    MSY   = Rmsy   - Smsy_lambert,
+    MSY.c   = Rmsy.c   - Smsy_lambert.c,    
+    
+    # Rmax - maximum recruitment
+    Rmax.c = exp(lnalpha.c) * (1 / beta1) * exp(-1),
+    Rmax   = exp(lnalpha)   * (1 / beta1) * exp(-1)) %>%
   as.data.frame()
 
 write.csv(coda, file= paste0(out.path,"/coda.csv") ,row.names=FALSE)  
@@ -168,7 +168,7 @@ df1 <- data.frame(Smsy = Smsy)
 df2 <- data.frame(Umsy = Umsy)
 
 # lambert density plots----
-out.file <- paste0("years_1988_on/AR1_model/output/density.png")
+out.file <- paste0(out.path, "/density.png")
 theme_set(theme_bw(base_size = 14, base_family = "Arial"))
 
 plot1 <- ggplot(df1, aes(x = Smsy)) +
@@ -219,7 +219,8 @@ post_df <- as.data.frame(as.mcmc(do.call(rbind, post))) %>%
     cols = -iter,
     names_to = "parameter",
     values_to = "value")
-out.file <- paste0("years_1988_on/AR1_model/output/posterior_densities.png")
+
+out.file <- paste0(out.path, "/posterior_densities.png")
 ggplot(post_df, aes(x = value)) +
   geom_density(fill = "steelblue", alpha = 0.4, color = "black") +
   facet_wrap(~ parameter, scales = "free", ncol = 3) +
@@ -237,8 +238,7 @@ df_trace <- as.data.frame.table(post.arr, responseName = "value") %>%
   mutate(
     iter  = as.numeric(iter),
     chain = as.factor(chain))
-
-out.file <- paste0("years_1988_on/AR1_model/output/trace_plots.png")
+out.file <- paste0(out.path, "/trace_plots.png")
 ggplot(df_trace, aes(x = iter, y = value, color = chain)) +
   geom_line(alpha = 0.7, linewidth = 0.4) +
   facet_wrap(~ var, scales = "free_y") +
@@ -249,7 +249,7 @@ ggplot(df_trace, aes(x = iter, y = value, color = chain)) +
     legend.position = "bottom")
 ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 
-out.file <- paste0("years_1988_on/AR1_model/output/dens_plots.png")
+out.file <- paste0(out.path, "/dens_plots.png")
 dens_plot <- ggplot(df_trace, aes(value, fill = chain)) +
   geom_density(alpha = 0.4) +
   facet_wrap(~ var, scales = "free") +
@@ -273,8 +273,6 @@ rbind(coda1, coda2, coda3) %>%
 
 # recruit plot data
 read.csv("data/Situk_sockeye.csv") %>%
-  mutate(year = as.numeric(year)) %>%
-  filter(year > 1987) %>%
   mutate(yield = (recruit50 - spawn),
          logR = log(recruit50)) -> dat
 R <- dat$recruit50
@@ -315,16 +313,17 @@ names(RD_df)  <- paste0("RD.", 1:n_years)
 names(RD2_df) <- paste0("RD2.", 1:n_years)
 
 # Combine and write to CSV
+
 out <- cbind(RD_df, RD2_df)
-write.csv(out, file = "years_1988_on/AR1_model/output/processed/recruit_data.csv", row.names = FALSE)
+write.csv(out, paste0(out.path, "/processed/recruit_data.csv"), row.names = FALSE)
 
 # create param table
-read.csv("years_1988_on/AR1_model/output/quantiles_lambert.csv") %>%
+read.csv(file.path(out.path, "/quantiles_lambert.csv")) %>%
   dplyr::select(variable, X2.5, X50, X97.5, post_cv) %>%
-  write.csv(., file = "years_1988_on/AR1_model/output/processed/params.csv", row.names = FALSE)
+  write.csv(., paste0(out.path, "/processed/params.csv"), row.names = FALSE)
 
 # ACF plots
-pdf("years_1988_on/AR1_model/output/ACF_parameters.pdf", width = 7, height = 5)
+pdf(file = file.path(out.path, "ACF_parameters.pdf"), height = 5, width = 7)
 for(p in parameters){
   acf_param(post, p, combine = TRUE)
 }

@@ -40,6 +40,10 @@ source("years_1976_on/AR1_model/code/functions.R")
 out.path <- paste0("years_1976_on/AR1_model/output/")
 if(!exists(out.path)){dir.create(out.path)}
 
+# create output folder for model results
+out.path <- paste0("years_1976_on/AR1_model/output/processed/")
+if(!exists(out.path)){dir.create(out.path)}
+
 # choices of model runs
 if(jags.settings == "test"){
   n.adapt.use <- 100 ; n.iter.use <- 500;  n.burnin.use <- 100;   thin.use = 10
