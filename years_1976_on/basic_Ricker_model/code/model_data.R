@@ -1,7 +1,7 @@
 library(tidyverse)
 
 # data----
-brood <- read.csv("years_1976_on/basic_Ricker_model/data/Situk_sockeye.csv", header = TRUE)
+brood <- read.csv("data/Situk_sockeye.csv", header = TRUE)
 brood
 
 # cleanup data

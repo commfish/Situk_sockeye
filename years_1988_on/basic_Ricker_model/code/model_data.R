@@ -1,11 +1,9 @@
 library(tidyverse)
 
 # data----
-brood <- read.csv("years_1988_on/basic_Ricker_model/data/Situk_sockeye.csv", header = TRUE)
-brood
-
-# cleanup data
-brood %>% 
+read.csv("data/Situk_sockeye.csv", header = TRUE) %>%
+  mutate(year = as.numeric(year)) %>%
+  filter(year > 1987) %>% 
   dplyr::select(S = spawn, R1 = recruit25, R2 = recruit50, R3 = recruit75) %>% 
   mutate(n()) -> sr
 
