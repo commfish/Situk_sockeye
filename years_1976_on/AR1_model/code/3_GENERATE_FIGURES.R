@@ -30,28 +30,28 @@ library(fngr)
 # extrafont::font_import()
 windowsFonts(Times=windowsFont("TT Times New Roman"))
 theme_set(theme_report(base_size = 14))
-source("years_1976_on/basic_Ricker_model/code/functions.R")
+source("years_1976_on/AR1_model/code/functions.R")
 
-if(!dir.exists(file.path("years_1976_on", "basic_Ricker_model", "output", "processed"))){dir.create(file.path("years_1976_on", "basic_Ricker_model", "output", "processed"))}
+if(!dir.exists(file.path("years_1976_on", "AR1_model", "output", "processed"))){dir.create(file.path("years_1976_on", "AR1_model", "output", "processed"))}
 
 # data----
-read.csv("years_1976_on/basic_Ricker_model/data/Situk_sockeye.csv") %>%
+read.csv("years_1976_on/AR1_model/data/Situk_sockeye.csv") %>%
   mutate(yield = (recruit50 - spawn)) -> spawnrecruitdat
-read.csv("years_1976_on/basic_Ricker_model/data/Situk_sockeye_historic.csv") -> spawnrecruitdat_historic
+read.csv("years_1976_on/AR1_model/data/Situk_sockeye_historic.csv") -> spawnrecruitdat_historic
 points_all <- dplyr::bind_rows(
   spawnrecruitdat  |> dplyr::mutate(Group = "Recent"),
   spawnrecruitdat_historic |> dplyr::mutate(Group = "Historic"))
 
 read.csv(file = paste0(out.path,"/coda.csv")) -> coda
-read.csv("years_1976_on/basic_Ricker_model/output/processed/recruit_data.csv") -> recruit
+read.csv("years_1976_on/AR1_model/output/processed/recruit_data.csv") -> recruit
 
 # analysis----
 # function for probability profiles and figures
 #profile(i = 10, z = 50, xa.start = 0, xa.end = 8000, lnalpha.c, beta1, coda) # can change i,z, xa.start, xa.end 
 profile(i = 5, z = 20, xa.start = 0, xa.end = 20000, lnalpha.c, lnalpha, beta1, coda) # can change i,z, xa.start, xa.end 
-QM <- read.csv("years_1976_on/basic_Ricker_model/output/processed/QM.csv")
-CI_median <- read.csv("years_1976_on/basic_Ricker_model/output/processed/CI_median.csv")
-CI_mean <- read.csv("years_1976_on/basic_Ricker_model/output/processed/CI_mean.csv")
+QM <- read.csv("years_1976_on/AR1_model/output/processed/QM.csv")
+CI_median <- read.csv("years_1976_on/AR1_model/output/processed/CI_median.csv")
+CI_mean <- read.csv("years_1976_on/AR1_model/output/processed/CI_mean.csv")
 
 # horsetail (spawner recruit) plots
 ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
@@ -69,7 +69,7 @@ ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
   theme(text=element_text(size=14)) +
   geom_text(size=3, data=spawnrecruitdat, aes(x=spawn, y=recruit50, label = year,family="Times",
                                              hjust = -0.1, vjust= -0.4))
-ggsave("years_1976_on/basic_Ricker_model/output/processed/horsetail.png", dpi = 500, height = 6, width = 8, units = "in")
+ggsave("years_1976_on/AR1_model/output/processed/horsetail.png", dpi = 500, height = 6, width = 8, units = "in")
 
 # horsetail (spawner recruit) historic plots
 ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
@@ -90,7 +90,7 @@ ggplot(data = CI_median, aes(x = Escapement, y = Median)) +
         legend.position = c(0.80, 0.85),
         legend.title = element_blank(),
         legend.text = element_text(size = 16))
-ggsave("years_1976_on/basic_Ricker_model/output/processed/horsetail_historic.png", dpi = 500, height = 6, width = 8, units = "in")
+ggsave("years_1976_on/AR1_model/output/processed/horsetail_historic.png", dpi = 500, height = 6, width = 8, units = "in")
 
 # expected yield plot
 ggplot(QM, aes(Escapement, Median))+geom_line(size=1)+
@@ -100,10 +100,10 @@ ggplot(QM, aes(Escapement, Median))+geom_line(size=1)+
   scale_x_continuous(labels = comma,breaks = seq(0, 250000, 50000), limits = c(0,250000))+
   scale_y_continuous(labels = comma,breaks = seq(-200000, 200000, 50000), limits = c(-200000,200000))+
   geom_hline(yintercept = 0, lty = 2, col = "grey10") + geom_point(data=spawnrecruitdat, aes(x=spawn, y=yield),pch=16, size = 2) 
-ggsave("years_1976_on/basic_Ricker_model/output/processed/expected_yield.png", dpi = 500, height = 6, width = 8, units = "in")
+ggsave("years_1976_on/AR1_model/output/processed/expected_yield.png", dpi = 500, height = 6, width = 8, units = "in")
 
 # yield profiles 
-read.csv("years_1976_on/basic_Ricker_model/output/processed/optimal_yield_data.csv") %>%
+read.csv("years_1976_on/AR1_model/output/processed/optimal_yield_data.csv") %>%
   filter(max_pct == 0.9) -> optimal_yield_data
 
 optimal_yield_data %>%
@@ -144,13 +144,13 @@ ggplot(fig_data3, aes(x = Escapement, y = Probability)) +
   scale_linetype_discrete(name = "Percent of Max.") +
   facet_grid(sra ~ .)  -> plot3
 cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
-ggsave("years_1976_on/basic_Ricker_model/output/processed/yield_profiles.png", dpi = 500, height = 7, width = 6, units = "in")
+ggsave("years_1976_on/AR1_model/output/processed/yield_profiles.png", dpi = 500, height = 7, width = 6, units = "in")
 
 # residual plot 
 tickryr <- data.frame(Year = 1976:2020)
 xaxis <- fngr::tickr(tickryr, Year, 4)
-recruit <- read.csv("years_1976_on/basic_Ricker_model/output/processed/recruit_data.csv") %>%
-  dplyr::select(RD.1:RD.43)# RD2s is AR1 model and RDs is the basic Ricker model
+recruit <- read.csv("years_1976_on/AR1_model/output/processed/recruit_data.csv") %>%
+  dplyr::select(RD2.1:RD2.43)# RD2s is AR1 model and RDs is the basic Ricker model
 
 names(recruit) <- as.character(1976:2018)
 
@@ -173,7 +173,7 @@ ggplot(., aes(year, average))+geom_line(linewidth=1) + geom_point(size=3)+
   geom_hline(yintercept = 0, color = "grey70", lty = 2) -> plot1
 
 # predicted plot (recruits)
-recruit <- read.csv("years_1976_on/basic_Ricker_model/output/processed/recruit_data.csv") %>%
+recruit <- read.csv("years_1976_on/AR1_model/output/processed/recruit_data.csv") %>%
   dplyr::select(RD.1:RD.43) # RD2s is AR1 model and RDs is the basic Ricker model
 
 names(recruit) <- as.character(1976:2018)
@@ -205,10 +205,10 @@ ggplot(aes(year, R.m)) +
   annotate("text", x = 1976, y = 13, label = "a)", family = "Times", size = 6) +
   theme(axis.text.x = element_text(size = 10)) -> plot2
 cowplot::plot_grid(plot2, plot1,  align = "v", nrow = 2, ncol=1)
-ggsave("years_1976_on/basic_Ricker_model/output/processed/resids_recruit.png", dpi = 500, height = 7, width = 8, units = "in")
+ggsave("years_1976_on/AR1_model/output/processed/resids_recruit.png", dpi = 500, height = 7, width = 8, units = "in")
 
 # create optimal yield plot
-read.csv("years_1976_on/basic_Ricker_model/output/processed/yield.csv") -> df
+read.csv("years_1976_on/AR1_model/output/processed/yield.csv") -> df
 get_two_nearest_bounds(df, "oy_0.9", 0.70)
 get_two_nearest_bounds(df, "oy_0.9", 0.75)
 get_two_nearest_bounds(df, "oy_0.9", 0.80)

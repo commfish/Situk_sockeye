@@ -40,10 +40,10 @@ model {
   }
 
   # Mean‑adjusted ln(alpha) AR1
-  # lnalpha.c <- lnalpha + 0.5 * (sigma * sigma) / (1 - phi * phi) 
+   lnalpha.c <- lnalpha + 0.5 * (sigma * sigma) / (1 - phi * phi) 
   
   # Mean‑adjusted ln(alpha) Basic Ricker
-  lnalpha.c <- lnalpha + 0.5 * (sigma * sigma)
+  #lnalpha.c <- lnalpha + 0.5 * (sigma * sigma)
 
   # Back‑transform
   alpha <- exp(lnalpha)
