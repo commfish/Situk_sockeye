@@ -176,7 +176,7 @@ ggplot(., aes(year, average))+geom_line(linewidth=1) + geom_point(size=3)+
 
 # predicted plot (recruits)
 recruit <- read.csv("years_1988_on/AR1_model/output/processed/recruit_data.csv") %>%
-  dplyr::select(RD.1:RD.43) # RD2s is AR1 model and RDs is the basic Ricker model
+  dplyr::select(RD2.1:RD2.43) # RD2s is AR1 model and RDs is the basic Ricker model
 
 names(recruit) <- as.character(1988:2018)
 
