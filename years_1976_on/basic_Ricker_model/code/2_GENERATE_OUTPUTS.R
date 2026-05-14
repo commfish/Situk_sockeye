@@ -272,7 +272,7 @@ rbind(coda1, coda2, coda3) %>%
   as.data.frame() -> SR.post
 
 # recruit plot data
-read.csv("years_1976_on/basic_Ricker_model/data/Situk_sockeye.csv") %>%
+read.csv("data/Situk_sockeye.csv") %>%
   mutate(yield = (recruit50 - spawn),
          logR = log(recruit50)) -> dat
 R <- dat$recruit50

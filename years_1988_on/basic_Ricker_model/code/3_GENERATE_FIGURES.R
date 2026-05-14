@@ -35,9 +35,11 @@ source("years_1988_on/basic_Ricker_model/code/functions.R")
 if(!dir.exists(file.path("years_1988_on", "basic_Ricker_model", "output", "processed"))){dir.create(file.path("years_1988_on", "basic_Ricker_model", "output", "processed"))}
 
 # data----
-read.csv("years_1988_on/basic_Ricker_model/data/Situk_sockeye.csv") %>%
+read.csv("data/Situk_sockeye.csv") %>%
+  mutate(year = as.numeric(year)) %>%
+  filter(year > 1987) %>%
   mutate(yield = (recruit50 - spawn)) -> spawnrecruitdat
-read.csv("years_1988_on/basic_Ricker_model/data/Situk_sockeye_historic.csv") -> spawnrecruitdat_historic
+read.csv("data/Situk_sockeye_historic.csv") -> spawnrecruitdat_historic
 points_all <- dplyr::bind_rows(
   spawnrecruitdat  |> dplyr::mutate(Group = "Recent"),
   spawnrecruitdat_historic |> dplyr::mutate(Group = "Historic"))
