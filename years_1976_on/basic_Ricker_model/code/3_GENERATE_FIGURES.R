@@ -48,7 +48,7 @@ read.csv("years_1976_on/basic_Ricker_model/output/processed/recruit_data.csv") -
 # analysis----
 # function for probability profiles and figures
 #profile(i = 10, z = 50, xa.start = 0, xa.end = 8000, lnalpha.c, beta1, coda) # can change i,z, xa.start, xa.end 
-#profile(i = 5, z = 20, xa.start = 0, xa.end = 20000, lnalpha.c, lnalpha, beta1, coda) # can change i,z, xa.start, xa.end 
+profile(i = 5, z = 20, xa.start = 0, xa.end = 20000, lnalpha.c, lnalpha, beta1, coda) # can change i,z, xa.start, xa.end 
 QM <- read.csv("years_1976_on/basic_Ricker_model/output/processed/QM.csv")
 CI_median <- read.csv("years_1976_on/basic_Ricker_model/output/processed/CI_median.csv")
 CI_mean <- read.csv("years_1976_on/basic_Ricker_model/output/processed/CI_mean.csv")
@@ -144,7 +144,7 @@ ggplot(fig_data3, aes(x = Escapement, y = Probability)) +
   scale_linetype_discrete(name = "Percent of Max.") +
   facet_grid(sra ~ .)  -> plot3
 cowplot::plot_grid(plot2,plot3,plot1, align = "v", nrow = 3, ncol=1) 
-ggsave("output/base_case/processed/yield_profiles.png", dpi = 500, height = 7, width = 6, units = "in")
+ggsave("years_1976_on/basic_Ricker_model/output/processed/yield_profiles.png", dpi = 500, height = 7, width = 6, units = "in")
 
 # residual plot 
 tickryr <- data.frame(Year = 1976:2020)
