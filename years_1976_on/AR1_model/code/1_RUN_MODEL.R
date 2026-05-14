@@ -29,20 +29,15 @@ library(gridExtra)
 
 # if test runs then do sensitivity tests with explore, and final run with full
 # "explore" version takes ~10min with the current settings.
-out.label <-  "base_case"  # label to be used for the output folder (and for scenario comparisons)
 package.use <- "rjags"  
-jags.settings <- "full"  # "test" or "explore" or full" 
+jags.settings <- "test"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
 # load custom functions
-source("code/functions.R")
+source("years_1976_on/basic_Ricker_model/code/functions.R")
 
 # create output folder for model results
-out.path <- paste0("output/", out.label)
-if(!exists(out.path)){dir.create(out.path)}
-
-# create output folder for model results
-out.path <- paste0("output/", out.label)
+out.path <- paste0("years_1976_on/basic_Ricker_model/output/")
 if(!exists(out.path)){dir.create(out.path)}
 
 # choices of model runs
@@ -67,10 +62,10 @@ if (jags.settings == "full") {
 
 # STEP 2: READ IN DATA, MODEL, AND INITIAL VALUES----
 # generates the object "dat"
-source("code/model_data.R")
+source("years_1976_on/basic_Ricker_model/code/model_data.R")
 
 # generates initial values
-source("code/model_inits.R")
+source("years_1976_on/basic_Ricker_model/code/model_inits.R")
 
 # STEP 3: RUN THE MODEL AND PROCESS THE OUTPUT----
 start.jags <- proc.time()
@@ -79,7 +74,7 @@ if(package.use == "rjags" & sensitivity.analysis == 0){
   parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0", "e")
   
   jmod <- rjags::jags.model(
-    file='code/Situk_sockeye.txt', 
+    file='years_1976_on/basic_Ricker_model/code/Situk_sockeye.txt', 
     data = dat, n.chains = 3, 
     inits = inits, 
     n.adapt = n.adapt.use) 
