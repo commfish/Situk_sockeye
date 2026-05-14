@@ -30,7 +30,7 @@ library(gridExtra)
 # if test runs then do sensitivity tests with explore, and final run with full
 # "explore" version takes ~10min with the current settings.
 package.use <- "rjags"  
-jags.settings <- "full"  # "test" or "explore" or full" 
+jags.settings <- "test"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
 # load custom functions
@@ -62,10 +62,10 @@ if (jags.settings == "full") {
 
 # STEP 2: READ IN DATA, MODEL, AND INITIAL VALUES----
 # generates the object "dat"
-source("code/model_data.R")
+source("years_1976_on/basic_Ricker_model/code/model_data.R")
 
 # generates initial values
-source("code/model_inits.R")
+source("years_1976_on/basic_Ricker_model/code/model_inits.R")
 
 # STEP 3: RUN THE MODEL AND PROCESS THE OUTPUT----
 start.jags <- proc.time()
@@ -74,7 +74,7 @@ if(package.use == "rjags" & sensitivity.analysis == 0){
   parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0", "e")
   
   jmod <- rjags::jags.model(
-    file='code/Situk_sockeye.txt', 
+    file='years_1976_on/basic_Ricker_model/code/Situk_sockeye.txt', 
     data = dat, n.chains = 3, 
     inits = inits, 
     n.adapt = n.adapt.use) 

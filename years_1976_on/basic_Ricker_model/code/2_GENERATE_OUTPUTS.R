@@ -61,7 +61,7 @@ geweke_df <- dplyr::relocate(geweke_df, variable)
 colnames(geweke_df)[2:ncol(geweke_df)] <- paste0("chain", seq_len(ncol(geweke_df) - 1))
 write.csv(geweke_df, paste0(out.path,"/geweke.csv")) 
 
-pdf("output/base_case/geweke.pdf",height=10, width=8,onefile=T)
+pdf("years_1976_on/basic_Ricker_model/output/geweke.pdf",height=10, width=8,onefile=T)
 geweke.plot(post)
 dev.off()
 
