@@ -99,8 +99,8 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, lnalpha, beta1, coda){
   qm <- spread(qm, measure, value)
   qm <- qm[c("q95", "q90", "Median","q10", "q5", "Escapement")]
   yield  <- yield [c("oy_0.9", "oy_0.8", "oy_0.7", "of_0.9", "of_0.8", "of_0.7","or_0.9","or_0.8","or_0.7","Escapement")]
-  write.csv(qm,("years_1976_on/basic_Ricker_model/output/processed/QM.csv"), row.names=FALSE)
-  write.csv(yield,("years_1976_on/basic_Ricker_model/output/processed/yield.csv"), row.names=FALSE)
+  write.csv(qm,("years_1988_on/basic_Ricker_model/output/processed/QM.csv"), row.names=FALSE)
+  write.csv(yield,("years_1988_on/basic_Ricker_model/output/processed/yield.csv"), row.names=FALSE)
   
   # confidence intervals (median)----
   dat10 %>%
@@ -118,7 +118,7 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, lnalpha, beta1, coda){
   CI <- data.frame(measure = names(mq), value = as.numeric(mq[1,]), Escapement=rep(c(0,x), length(unique(names(mq)))))
   CI <- spread(CI, measure, value)
   CI <- CI[c("q95", "q90", "Median","q10", "q5", "Escapement")]
-  write.csv(CI,("years_1976_on/basic_Ricker_model/output/processed/CI_median.csv"), row.names=FALSE)
+  write.csv(CI,("years_1988_on/basic_Ricker_model/output/processed/CI_median.csv"), row.names=FALSE)
   
   # confidence intervals (mean)----
   dat11 %>%
@@ -136,11 +136,11 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, lnalpha, beta1, coda){
   CI <- data.frame(measure = names(mq), value = as.numeric(mq[1,]), Escapement=rep(c(0,x), length(unique(names(mq)))))
   CI <- spread(CI, measure, value)
   CI <- CI[c("q95", "q90", "Median","q10", "q5", "Escapement")]
-  write.csv(CI,("years_1976_on/basic_Ricker_model/output/processed/CI_mean.csv"), row.names=FALSE)
+  write.csv(CI,("years_1988_on/basic_Ricker_model/output/processed/CI_mean.csv"), row.names=FALSE)
   
   
   # yield data
-  read.csv("years_1976_on/basic_Ricker_model/output/processed/yield.csv") -> yield 
+  read.csv("years_1988_on/basic_Ricker_model/output/processed/yield.csv") -> yield 
   
   yield %>% 
     dplyr::select(Escapement, oy_0.9, oy_0.8, oy_0.7) %>% 
@@ -174,7 +174,7 @@ profile <-function(i,z,xa.start, xa.end,lnalpha.c, lnalpha, beta1, coda){
     mutate(Escapement = as.numeric(Escapement),
            Probability = as.numeric(value),
            max_pct = as.factor(max_pct)) %>%
-  write.csv(., file= "years_1976_on/basic_Ricker_model/output/processed/optimal_yield_data.csv")}
+  write.csv(., file= "years_1988_on/basic_Ricker_model/output/processed/optimal_yield_data.csv")}
 
 # spawner-recruit data
 srmodel <- function(lnalpha,beta,S,d){
