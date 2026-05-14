@@ -1,11 +1,7 @@
 library(tidyverse)
 
 # data----
-brood <- read.csv("data/Situk_sockeye.csv", header = TRUE)
-brood
-
-# cleanup data
-brood %>% 
+brood <- read.csv("data/Situk_sockeye.csv", header = TRUE) %>% 
   dplyr::select(S = spawn, R1 = recruit25, R2 = recruit50, R3 = recruit75) %>% 
   mutate(n()) -> sr
 
