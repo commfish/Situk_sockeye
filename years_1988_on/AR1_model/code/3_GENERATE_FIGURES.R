@@ -151,9 +151,9 @@ ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 tickryr <- data.frame(Year = 1976:2020)
 xaxis <- fngr::tickr(tickryr, Year, 4)
 recruit <- read.csv(file = paste0(out.path,"/output/processed/recruit_data.csv")) %>%
-  dplyr::select(RD2.1:RD2.43)# RD2s is AR1 model and RDs is the basic Ricker model
+  dplyr::select(RD2.1:RD2.31)# RD2s is AR1 model and RDs is the basic Ricker model
 
-names(recruit) <- as.character(1976:2018)
+names(recruit) <- as.character(1988:2018)
 
 resid_summary <- recruit %>%
   pivot_longer(cols = everything(), names_to = "year", values_to = "resid") %>%
@@ -175,9 +175,9 @@ resid_summary <- recruit %>%
 
 # predicted plot (recruits)
 recruit <- read.csv(file = paste0(out.path,"/output/processed/recruit_data.csv")) %>%
-  dplyr::select(RD2.1:RD2.43) # RD2s is AR1 model and RDs is the basic Ricker model
+  dplyr::select(RD2.1:RD2.31) # RD2s is AR1 model and RDs is the basic Ricker model
 
-names(recruit) <- as.character(1976:2018)
+names(recruit) <- as.character(1988:2018)
 
 recruit %>%
   pivot_longer(cols = everything(), names_to = "year", values_to = "resid") %>%
