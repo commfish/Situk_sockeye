@@ -273,6 +273,7 @@ rbind(coda1, coda2, coda3) %>%
 
 # recruit plot data
 read.csv("data/Situk_sockeye.csv") %>%
+  filter(year > 1987) %>%
   mutate(yield = (recruit50 - spawn),
          logR = log(recruit50)) -> dat
 R <- dat$recruit50
