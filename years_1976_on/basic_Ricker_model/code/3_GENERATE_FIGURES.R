@@ -216,4 +216,19 @@ get_two_nearest_bounds(df, "oy_0.9", 0.80)
 get_two_nearest_bounds(df, "oy_0.9", 0.85)
 get_two_nearest_bounds(df, "oy_0.9", 0.90)                     
 
-
+# productivity values
+read.csv(file= paste0(out.path,"/output/statsquants.csv")) %>%
+  select(variable, X2.5., X50., X97.5.) %>%
+  filter(grepl("lnalphai[", variable, fixed = TRUE))%>%
+  arrange(as.numeric(gsub("lnalphai\\[|\\]", "", variable))) %>%
+  mutate(year = 1976:2018)%>%
+  ggplot(., aes(x = year, y = X50.)) +
+  geom_ribbon(aes(ymin = X2.5., ymax = X97.5.), alpha = 0.15) +
+  geom_line(linewidth = 1) +
+  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1976, 2020)) +
+  scale_y_continuous(labels = comma, breaks = seq(-15, 15, 5), limits = c(-15, 15)) +
+  geom_point(pch = 16, size = 3)  +
+  xlab("Year") + ylab("ln(alpha)") +
+  theme(axis.text.x = element_text(size = 10)) 
+out.file <- paste0(out.path, "/output/processed/productivity_changes.png")
+ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")

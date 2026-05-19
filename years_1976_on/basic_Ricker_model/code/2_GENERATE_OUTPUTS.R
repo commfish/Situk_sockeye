@@ -340,20 +340,3 @@ acf_e <- acf(e_mean, plot = FALSE)
 
 data.frame(lag = as.numeric(acf_e$lag),acf = as.numeric(acf_e$acf))
 
-# productivity values
-read.csv(file= paste0(out.path,"/output/statsquants.csv")) %>%
-  select(variable, X2.5., X50., X97.5.) %>%
-  filter(grepl("lnalphai[", variable, fixed = TRUE))%>%
-  arrange(as.numeric(gsub("lnalphai\\[|\\]", "", variable))) %>%
-  mutate(year = 1976:2018)%>%
-  ggplot(., aes(x = year, y = X50.)) +
-  geom_ribbon(aes(ymin = X2.5., ymax = X97.5.),
-              fill = "skyblue", alpha = 0.3) +
-  geom_line(size = 0.8, color = "navy") +
-  geom_point(size = 1.5, color = "navy") +
-  labs(
-    x = "Year",
-    y = "ln(alpha)") +
-  theme_bw(base_size = 14)
-out.file <- paste0(out.path, "/output/productivity_changes.png")
-ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
