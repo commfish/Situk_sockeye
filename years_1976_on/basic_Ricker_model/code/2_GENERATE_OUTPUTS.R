@@ -10,7 +10,7 @@ d <- 4
 windowsFonts(Times=windowsFont("Arial"))
 theme_set(theme_sleek())
 out.path <- paste0("years_1976_on/basic_Ricker_model")
-parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0")
+parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0", "e", "lnalphai")
 
 # Numerical summary of each parameter (mean, median, quantiles of posteriors)----
 # https://stats.stackexchange.com/questions/429470/what-is-the-correct-effective-sample-size-ess-calculation
@@ -65,16 +65,16 @@ pdf(file = file.path(out.path, "output/geweke.pdf"), height = 10, width = 8)
 geweke.plot(post)
 dev.off()
 
-# 90th and 95th percentiles of output quants----
-get_quant <- function(parameters) {
-  x <- as.vector(post.arr[, parameters, ])   # extract all chains
-  q <- quantile(x, probs = c(0, .025, .05, .5, .95, .975, 1))
-  data.frame(parameter = parameters, t(q))
-}
-
-quant_table <- do.call(rbind, lapply(parameters, get_quant))
-
-write.csv(quant_table, paste0(out.path, "/output/percentiles.csv"), row.names = FALSE)
+# # 90th and 95th percentiles of output quants----
+# get_quant <- function(parameters) {
+#   x <- as.vector(post.arr[, parameters, ])   # extract all chains
+#   q <- quantile(x, probs = c(0, .025, .05, .5, .95, .975, 1))
+#   data.frame(parameter = parameters, t(q))
+# }
+# 
+# quant_table <- do.call(rbind, lapply(parameters, get_quant))
+# 
+# write.csv(quant_table, paste0(out.path, "/output/percentiles.csv"), row.names = FALSE)
 
 # lambert calc----
 # Extract parameters from posterior array
@@ -339,3 +339,21 @@ e_mean <- colMeans(post_mat[, e_cols])
 acf_e <- acf(e_mean, plot = FALSE)
 
 data.frame(lag = as.numeric(acf_e$lag),acf = as.numeric(acf_e$acf))
+
+# productivity values
+read.csv(file= paste0(out.path,"/output/statsquants.csv")) %>%
+  select(variable, X2.5., X50., X97.5.) %>%
+  filter(grepl("lnalphai[", variable, fixed = TRUE))%>%
+  arrange(as.numeric(gsub("lnalphai\\[|\\]", "", variable))) %>%
+  mutate(year = 1976:2018)%>%
+  ggplot(., aes(x = year, y = X50.)) +
+  geom_ribbon(aes(ymin = X2.5., ymax = X97.5.),
+              fill = "skyblue", alpha = 0.3) +
+  geom_line(size = 0.8, color = "navy") +
+  geom_point(size = 1.5, color = "navy") +
+  labs(
+    x = "Year",
+    y = "ln(alpha)") +
+  theme_bw(base_size = 14)
+out.file <- paste0(out.path, "/output/productivity_changes.png")
+ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")

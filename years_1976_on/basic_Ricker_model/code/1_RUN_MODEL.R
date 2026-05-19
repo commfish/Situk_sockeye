@@ -75,7 +75,7 @@ source("years_1976_on/basic_Ricker_model/code/model_inits.R")
 start.jags <- proc.time()
 sw.randomseed <- 200
 if(package.use == "rjags" & sensitivity.analysis == 0){
-  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0", "e")
+  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0", "e", "lnalphai")
   
   jmod <- rjags::jags.model(
     file='years_1976_on/basic_Ricker_model/code/Situk_sockeye.txt', 

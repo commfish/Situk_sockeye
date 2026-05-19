@@ -48,5 +48,4 @@ model {
   # Back‑transform
   alpha <- exp(lnalpha)
   alpha.c <- exp(lnalpha.c)
-
 }
