@@ -18,6 +18,7 @@ library(ggplot2)
 library(scales)
 library(cowplot)
 library("devtools")
+library(matrixStats)
 devtools::install_github("commfish/fngr")
 library(fngr)
 library(extrafont)
@@ -75,7 +76,7 @@ source("years_1976_on/AR1_model/code/model_inits.R")
 start.jags <- proc.time()
 sw.randomseed <- 200
 if(package.use == "rjags" & sensitivity.analysis == 0){
-  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0", "e")
+  parameters <- c("lnalpha", "phi", "beta", "sigma", "sigmaw", "Tau", "tauw", "alpha", "lnalpha.c", "e0", "e", "lnalphai")
   
   jmod <- rjags::jags.model(
     file='years_1976_on/AR1_model/code/Situk_sockeye.txt', 
