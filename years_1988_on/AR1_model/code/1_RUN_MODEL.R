@@ -30,7 +30,7 @@ library(gridExtra)
 # if test runs then do sensitivity tests with explore, and final run with full
 # "explore" version takes ~10min with the current settings.
 package.use <- "rjags"  
-jags.settings <- "test"  # "test" or "explore" or full" 
+jags.settings <- "full"  # "test" or "explore" or full" 
 sensitivity.analysis <- 0 #0; 1 is yes and 0 is no
 
 # load custom functions
