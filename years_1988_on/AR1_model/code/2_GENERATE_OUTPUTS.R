@@ -340,3 +340,4 @@ e_mean <- colMeans(post_mat[, e_cols])
 acf_e <- acf(e_mean, plot = FALSE)
 
 data.frame(lag = as.numeric(acf_e$lag),acf = as.numeric(acf_e$acf))
+
