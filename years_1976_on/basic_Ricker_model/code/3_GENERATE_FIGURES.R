@@ -37,7 +37,6 @@ SEQ  <- quant_lambert[quant_lambert$variable == "Seq", "X50"]
 # data----
 read.csv("data/Situk_sockeye.csv") %>%
   mutate(year = as.numeric(year)) %>%
-  filter(year > 1987) %>%
   mutate(yield = (recruit50 - spawn),
          lnRS = log(recruit50/spawn)) -> spawnrecruitdat
 read.csv("data/Situk_sockeye_historic.csv") -> spawnrecruitdat_historic
@@ -240,7 +239,6 @@ ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
 # Durbin-Watcon test
 # Linear regression is done in R using the lm() function, in the form lm(y~x).
 # Storing the results from lm() in lm_fit creates an object that we can extract information from.
-spawnrecruitdat
 S <- spawnrecruitdat$spawn
 R <- spawnrecruitdat$recruit50
 log_RS <-spawnrecruitdat$lnRS
