@@ -58,7 +58,7 @@ plot_S + labs(caption = stringr::str_wrap("Note: Escapement goal lower and
                                           upper bounds are shown as solid and dashed
                                           lines, respectively. Escapements below
                                           the lower bound of the contemporaneous
-                                          escapements goal are indicated with black fill.", width = 85))
+                                          escapement goal are indicated with black fill.", width = 85))
 out.file <- paste0(out.path, "/output/processed/Esc.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 # spawner recruit plot (see table 12 in Clark et al. 2002); sigma is square root of the residual mean square error
