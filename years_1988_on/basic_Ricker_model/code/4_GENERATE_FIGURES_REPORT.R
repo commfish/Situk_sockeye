@@ -44,6 +44,8 @@ read.csv("data/Situk_sockeye_historic.csv") %>%
 
 read.csv("data/goal_Situk.csv") -> goal_Situk 
 
+read.csv("years_1988_on/basic_Ricker_model/output/post_data.csv") -> post_Situk_byr88_18 
+read.csv("years_1976_on/basic_Ricker_model/output/post_data.csv") -> post_Situk_byr76_18
 
 # create brood tables
 brood_Situk <- get_brood(run_data = Situk_sockeye_run)
@@ -60,8 +62,7 @@ plot_S + labs(caption = stringr::str_wrap("Note: Escapement goal lower and
                                           Goals prior to 1995...", width = 85))
 
 # spawner recruit plot (see table 12 in Clark et al. 2002); sigma is square root of the residual mean square error
-read.csv(file = paste0(out.path,"/output/post_data.csv")) -> post_Situk_byr76_18
-
+# 1976-2018
 post_Situk_byr76_18 <- list("Brood years: 1976-2018" = post_Situk_byr76_18)
 
 post_onlyparameters <-
@@ -70,8 +71,8 @@ post_onlyparameters <-
 
 goal_onlyparameters_new <-goal_Situk %>%
   bind_rows(data.frame(yr = 2026,
-               lb = 25000,
-               ub = 100000))
+                       lb = 30000,
+                       ub = 70000))
 
 plot_SR <- plot_SR(post_onlyparameters,
         Situk_sockeye_historic,
@@ -79,15 +80,38 @@ plot_SR <- plot_SR(post_onlyparameters,
         "Situk River Sockeye Salmon",
         new_finding = TRUE,
         multiplier = 1e-4)
-plot_SR + geom_point(data = Situk_sockeye, pch =16, size =2) +
+plot_SR + geom_point(data = Situk_sockeye_76, pch =16, size =2) +
   labs(subtitle = paste0("Brood Years: 1976-2018"))
+
+# spawner recruit plot (see table 12 in Clark et al. 2002); sigma is square root of the residual mean square error
+# 1988-2018
+post_Situk_byr88_18 <- list("Brood years: 1988-2018" = post_Situk_byr88_18)
+
+post_onlyparameters <-
+  c(list('Brood years: 1976-1997' = c(lnalpha = 1.396244692, beta = 0.11, sigma = 0.36)),
+    post_Situk_byr88_18)
+
+goal_onlyparameters_new <-goal_Situk %>%
+  bind_rows(data.frame(yr = 2026,
+                       lb = 30000,
+                       ub = 70000))
+
+plot_SR <- plot_SR(post_onlyparameters,
+                   Situk_sockeye_historic,
+                   goal_dat = goal_onlyparameters_new,
+                   "Situk River Sockeye Salmon",
+                   new_finding = TRUE,
+                   multiplier = 1e-4)
+plot_SR + geom_point(data = Situk_sockeye_88, pch =16, size =2) +
+  labs(subtitle = paste0("Brood Years: 1988-2018"))
+
        
 # expected yield plot
 posterior_missing <- 
   c(list('Brood years: 1976-1997' = NULL),
     post_Situk_byr76_18)
 
-goal_new <- data.frame(yr = 2026, lb = 250000, ub = 100000)
+goal_new <- data.frame(yr = 2026, lb = 28000, ub = 50000)
 
 plot_EY <-plot_ey(posterior_missing,
         Situk_sockeye_historic,

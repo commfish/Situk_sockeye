@@ -340,3 +340,26 @@ acf_e <- acf(e_mean, plot = FALSE)
 
 data.frame(lag = as.numeric(acf_e$lag),acf = as.numeric(acf_e$acf))
 
+# post dataframe for figures
+parameters <- c("beta", "e0", "lnalpha.c", "sigma")
+coda <- as.data.frame(post.arr[, parameters, ])
+
+# Combine chains into single data frame
+coda <- as.data.frame(post.arr[, parameters, ]) %>%
+  {
+    coda1 <- .[, 1:4]; coda2 <- .[, 5:8]; coda3 <- .[, 9:12]
+    names(coda1) <- parameters
+    names(coda2) <- parameters
+    names(coda3) <- parameters
+    rbind(coda1, coda2, coda3)
+  } %>%
+  mutate(
+    beta1 = beta * 10^-4,
+    
+    # alpha
+    lnalpha = lnalpha.c) %>%
+  dplyr::select(beta, e0, lnalpha, sigma) %>%
+  as.data.frame()
+
+write.csv(coda, file= paste0(out.path,"/output/post_data.csv") ,row.names=FALSE)  
+
