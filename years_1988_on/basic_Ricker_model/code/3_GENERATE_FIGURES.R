@@ -10,6 +10,7 @@ library(scales)
 library(backports)
 devtools::install_github("commfish/fngr")
 library(fngr)
+library(car)
 # font_import() # only need run once
 # extrafont::font_import()
 windowsFonts(Times=windowsFont("TT Times New Roman"))
@@ -37,7 +38,8 @@ SEQ  <- quant_lambert[quant_lambert$variable == "Seq", "X50"]
 read.csv("data/Situk_sockeye.csv") %>%
   mutate(year = as.numeric(year)) %>%
   filter(year > 1987) %>%
-  mutate(yield = (recruit50 - spawn)) -> spawnrecruitdat
+  mutate(yield = (recruit50 - spawn),
+         lnRS = log(recruit50/spawn)) -> spawnrecruitdat
 read.csv("data/Situk_sockeye_historic.csv") -> spawnrecruitdat_historic
 points_all <- dplyr::bind_rows(
   spawnrecruitdat  |> dplyr::mutate(Group = "Recent"),
@@ -217,4 +219,15 @@ get_two_nearest_bounds(df, "oy_0.9", 0.80)
 get_two_nearest_bounds(df, "oy_0.9", 0.85)
 get_two_nearest_bounds(df, "oy_0.9", 0.90)                     
 
-
+# Durbin-Watcon test
+# Linear regression is done in R using the lm() function, in the form lm(y~x).
+# Storing the results from lm() in lm_fit creates an object that we can extract information from.
+spawnrecruitdat
+S <- spawnrecruitdat$spawn
+R <- spawnrecruitdat$recruit50
+log_RS <-spawnrecruitdat$lnRS
+lm_fit <- lm(log_RS~S)
+summary(lm_fit)  # inspect the results
+fits <- lm_fit$fitted.values # fitted values and residuals can be extracted from lm_fit.
+resids <- lm_fit$residuals
+durbinWatsonTest(lm_fit) 

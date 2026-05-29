@@ -83,8 +83,17 @@ if(package.use == "rjags" & sensitivity.analysis == 0){
     inits = inits, 
     n.adapt = n.adapt.use) 
   
-  stats::update(jmod, n.iter = n.iter.use, by = by.use, progress.bar = 'text', DIC=T, n.burnin = n.burnin.use) # this modifies the original object, function returns NULL
-  post <- rjags::coda.samples(jmod, parameters, n.iter = n.iter.use, thin = thin.use, n.burnin = n.burnin.use)
+  # burn in
+  update(jmod, n.iter = n.iter.use, by = by.use, progress.bar = 'text', n.burnin = n.burnin.use) 
+  
+  # sammpling
+  post <- coda.samples(jmod, parameters, n.iter = n.iter.use, thin = thin.use, n.burnin = n.burnin.use)
+  
+  # DIC
+  dic.out <- dic.samples(
+    model = jmod,
+    n.iter = n.iter.use,
+    type = "pD")
   
   end.jags <- proc.time()   # store time for MCMC
   post.arr <- as.array(post) # convert to an accessible obj
@@ -97,5 +106,5 @@ if(package.use == "rjags" & sensitivity.analysis == 0){
   print(end.output - end.jags)
 }
 
-
+dic.out
 
