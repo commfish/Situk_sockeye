@@ -10,7 +10,7 @@ library(scales)
 library(backports)
 library(ggplot2)
 #install.packages("pak")
-pak::pak("adamreimer/EGprocess")
+#pak::pak("adamreimer/EGprocess")
 library(EGprocess)
 devtools::install_github("commfish/fngr")
 library(fngr)
@@ -58,9 +58,9 @@ plot_S + labs(caption = stringr::str_wrap("Note: Escapement goal lower and
                                           upper bounds are shown as solid and dashed
                                           lines, respectively. Escapements below
                                           the lower bound of the contemporaneous
-                                          escpements goal are indicated with black fill. 
-                                          Goals prior to 1995...", width = 85))
-
+                                          escapement goal are indicated with black fill.", width = 85))
+out.file <- paste0(out.path, "/output/processed/Esc.png")
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 # spawner recruit plot (see table 12 in Clark et al. 2002); sigma is square root of the residual mean square error
 # 1976-2018
 post_Situk_byr76_18 <- list("Brood years: 1976-2018" = post_Situk_byr76_18)
@@ -82,7 +82,8 @@ plot_SR <- plot_SR(post_onlyparameters,
         multiplier = 1e-4)
 plot_SR + geom_point(data = Situk_sockeye_76, pch =16, size =2) +
   labs(subtitle = paste0("Brood Years: 1976-2018"))
-
+out.file <- paste0(out.path, "/output/processed/SR_76_18.png")
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 # spawner recruit plot (see table 12 in Clark et al. 2002); sigma is square root of the residual mean square error
 # 1988-2018
 post_Situk_byr88_18 <- list("Brood years: 1988-2018" = post_Situk_byr88_18)
@@ -104,7 +105,8 @@ plot_SR <- plot_SR(post_onlyparameters,
                    multiplier = 1e-4)
 plot_SR + geom_point(data = Situk_sockeye_88, pch =16, size =2) +
   labs(subtitle = paste0("Brood Years: 1988-2018"))
-
+out.file <- paste0(out.path, "/output/processed/SR_88_18.png")
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
        
 # expected yield plot
 posterior_missing <- 
