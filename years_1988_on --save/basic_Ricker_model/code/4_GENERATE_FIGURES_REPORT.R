@@ -105,6 +105,7 @@ plot_SR <- plot_SR(post_onlyparameters,
                    multiplier = 1e-4)
 plot_SR + geom_point(data = Situk_sockeye_88, pch =16, size =2) +
   labs(subtitle = paste0("Brood Years: 1988-2018"))
+
 out.file <- paste0(out.path, "/output/processed/SR_88_18.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
        
@@ -128,7 +129,10 @@ plot_EY <-plot_ey(posterior_missing,
         new_finding =TRUE,
         multiplier = 1e-4)
 plot_EY + geom_point(data = Situk_sockeye_88, pch =16, size = 2) +
-  labs(subtitle = paste0("Brood Years: 1988-2018"))
+  labs(subtitle = paste0("Brood Years: 1988-2018"))+ labs(caption = stringr::str_wrap(
+    "Note: Hollow circles indicate the data when the escapement goal last changed, while filled circles 
+    and solid lines indicate the data collected since and the estimate of median sustained yield from all available data. Vertical lines show the escapement
+    that maximizes sustained yield. The new escapement goal finding is shaded brown.", width = 85))
 out.file <- paste0(out.path, "/output/processed/EY.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
