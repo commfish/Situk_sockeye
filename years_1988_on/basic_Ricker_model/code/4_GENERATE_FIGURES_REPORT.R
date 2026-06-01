@@ -131,6 +131,7 @@ plot_EY + geom_point(data = Situk_sockeye_88, pch =16, size = 2) +
   labs(subtitle = paste0("Brood Years: 1988-2018"))
 out.file <- paste0(out.path, "/output/processed/EY.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
+
 # optimal yield plot
 profile_missing <- get_profile(post_Situk_byr88_18, multiplier = 1e-4)
 
@@ -140,6 +141,7 @@ plot_profile(profile_missing,
              "Situk River Sockeye Salmon")
 out.file <- paste0(out.path, "/output/processed/profile.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
+
 # spawner recruit table
 table_SR(post_Situk_byr88_18[2], 
          title = "Situk River Sockeye Salmon", 
