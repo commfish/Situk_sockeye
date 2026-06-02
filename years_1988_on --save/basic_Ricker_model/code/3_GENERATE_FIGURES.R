@@ -18,8 +18,8 @@ theme_set(theme_report(base_size = 14))
 source("years_1988_on/basic_Ricker_model/code/functions.R")
 
 out.path <- paste0("years_1988_on/basic_Ricker_model")
-lower_bounds <- 33200 #lower bound of recommended escapement goal range (update)
-upper_bounds <- 59300 #upper bound of recommended escapement goal range (update)
+lower_bounds <- 27500 #lower bound of recommended escapement goal range (update)
+upper_bounds <- 70000 #upper bound of recommended escapement goal range (update)
 
 stat_quants <- read.csv(file= paste0(out.path,"/output/statsquants.csv"))
 quant_lambert <- read.csv(file= paste0(out.path,"/output/quantiles_lambert.csv")) 

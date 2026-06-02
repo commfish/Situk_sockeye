@@ -19,6 +19,7 @@ library(fngr)
 # data
 read.csv("data/Situk_sockeye_run.csv") -> Situk_sockeye_run # this dataset includes 1976-1987
 read.csv("data/Situk_sockeye_run_historic.csv") -> Situk_sockeye_run_historic 
+read.csv("data/Situk_sockeye_historic_EY.csv") -> historic_EY
 # read.csv("data/Situk_sockeye.csv") %>%
 #   mutate(S = spawn,
 #          R = recruit50,
@@ -129,9 +130,15 @@ plot_EY <-plot_ey(posterior_missing,
         new_finding =TRUE,
         multiplier = 1e-4)
 plot_EY + geom_point(data = Situk_sockeye_88, pch =16, size = 2) +
+  geom_line(data = historic_EY, aes(x = Escapement, y = Median), 
+            linetype = "dashed",
+            linewidth = 0.5) +
+  geom_vline(xintercept = 51854, linetype = "dashed",
+             linewidth = 0.5) +
   labs(subtitle = paste0("Brood Years: 1988-2018"))+ labs(caption = stringr::str_wrap(
-    "Note: Hollow circles indicate the data when the escapement goal last changed, while filled circles 
-    and solid lines indicate the data collected since and the estimate of median sustained yield from all available data. Vertical lines show the escapement
+    "Note: Hollow circles and dotted lines indicate the data when the escapement goal last changed, while filled circles 
+    and solid lines indicate the data collected since and the estimate of median sustained yield from all available data. 
+    The vertical lines show the escapement
     that maximizes sustained yield. The new escapement goal finding is shaded brown.", width = 85))
 out.file <- paste0(out.path, "/output/processed/EY.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")

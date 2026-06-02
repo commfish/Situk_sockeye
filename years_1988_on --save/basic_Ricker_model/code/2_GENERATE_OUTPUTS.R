@@ -342,7 +342,7 @@ acf_e <- acf(e_mean, plot = FALSE)
 data.frame(lag = as.numeric(acf_e$lag),acf = as.numeric(acf_e$acf))
 
 # post dataframe for figures
-parameters <- c("beta", "e0", "lnalpha.c", "sigma")
+parameters <- c("beta", "e0", "lnalpha", "sigma")
 coda <- as.data.frame(post.arr[, parameters, ])
 
 # Combine chains into single data frame
@@ -358,7 +358,7 @@ coda <- as.data.frame(post.arr[, parameters, ]) %>%
     beta1 = beta * 10^-4,
     
     # alpha
-    lnalpha = lnalpha.c) %>%
+    lnalpha = lnalpha) %>%
   dplyr::select(beta, e0, lnalpha, sigma) %>%
   as.data.frame()
 
