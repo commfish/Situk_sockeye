@@ -14,18 +14,14 @@ library(ggplot2)
 library(EGprocess)
 devtools::install_github("commfish/fngr")
 library(fngr)
+out.path <- paste0("years_1988_on/basic_Ricker_model")
 # font_import() # only need run once
 # extrafont::font_import()
+
 # data
 read.csv("data/Situk_sockeye_run.csv") -> Situk_sockeye_run # this dataset includes 1976-1987
 read.csv("data/Situk_sockeye_run_historic.csv") -> Situk_sockeye_run_historic 
 read.csv("data/Situk_sockeye_historic_EY.csv") -> historic_EY
-# read.csv("data/Situk_sockeye.csv") %>%
-#   mutate(S = spawn,
-#          R = recruit50,
-#          yr = year,         
-#          Y = (recruit50 - spawn)) %>%
-#   dplyr::select(yr, S, R, Y) -> Situk_sockeye_76
 
 read.csv("data/Situk_sockeye.csv") %>%
   mutate(year = as.numeric(year)) %>%
@@ -90,7 +86,7 @@ ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 post_Situk_byr88_18 <- list("Brood years: 1988-2018" = post_Situk_byr88_18)
 
 post_onlyparameters <-
-  c(list('Brood years: 1976-1997' = c(lnalpha = 1.396244692, beta = 0.11, sigma = 0.36)),
+  c(list('Brood years: 1976-1997' = c(lnalpha = 1.39, beta = 0.1089, sigma = 0.36)),
     post_Situk_byr88_18)
 
 goal_onlyparameters_new <-goal_Situk %>%

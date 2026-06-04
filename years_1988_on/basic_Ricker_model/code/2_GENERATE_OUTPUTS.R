@@ -355,10 +355,7 @@ coda <- as.data.frame(post.arr[, parameters, ]) %>%
     rbind(coda1, coda2, coda3)
   } %>%
   mutate(
-    beta1 = beta * 10^-4,
-    
-    # alpha
-    lnalpha = lnalpha) %>%
+    beta1 = beta * 10^-4) %>%
   dplyr::select(beta, e0, lnalpha, sigma) %>%
   as.data.frame()
 
