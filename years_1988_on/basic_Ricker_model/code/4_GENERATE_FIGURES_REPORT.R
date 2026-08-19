@@ -40,14 +40,13 @@ read.csv("data/Situk_sockeye_historic.csv") %>%
   dplyr::select(yr, S, R, Y) -> Situk_sockeye_historic 
 
 read.csv("data/goal_Situk.csv") -> goal_Situk 
-
 read.csv("years_1988_on/basic_Ricker_model/output/post_data.csv") -> post_Situk_byr88_18 
 
 # create brood tables
 brood_Situk <- get_brood(run_data = Situk_sockeye_run)
 brood_Situk_historic <- get_brood(run_data = Situk_sockeye_run_historic)
 
-# plot escapement
+# plot escapement (changes in goals from 1987 on)
 plot_S <- plot_escapement(brood_data = brood_Situk, goal_data = goal_Situk, 
                       title = "Situk River Sockeye Salmon")
 plot_S + labs(caption = stringr::str_wrap("Note: Escapement goal lower and 
@@ -58,7 +57,7 @@ plot_S + labs(caption = stringr::str_wrap("Note: Escapement goal lower and
 out.file <- paste0(out.path, "/output/processed/Esc.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
-# 1988-2018
+# 1988-2018 (spawner-recruit curves)
 post_Situk_byr88_18 <- list("Brood years: 1988-2018" = post_Situk_byr88_18)
 
 post_onlyparameters <-
@@ -77,7 +76,7 @@ plot_SR <- plot_SR(post_onlyparameters,
                    new_finding = TRUE,
                    multiplier = 1e-4)
 plot_SR + geom_point(data = Situk_sockeye_88, pch =16, size =2) +
-  labs(subtitle = paste0("Brood Years: 1988-2018")) + ylim (0, 400000)
+  labs(subtitle = paste0("Brood Years: 1988-2018")) + ylim(0, 500000)
 
 out.file <- paste0(out.path, "/output/processed/SR_88_18.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
