@@ -1,6 +1,6 @@
 # R CODE TO CREATE PROFILES DATA AND FIGURES (Horsetail plots, age comp, maturity at age,
 # point estimate plots, yield plots)
-# load----
+# load libraries----
 library(plyr)
 library(tidyverse)
 library(reshape2)
@@ -10,7 +10,7 @@ library(scales)
 library(backports)
 library(ggplot2)
 #install.packages("pak")
-#pak::pak("adamreimer/EGprocess")
+pak::pak("ADFG-DSF/EGprocess")
 library(EGprocess)
 devtools::install_github("commfish/fngr")
 library(fngr)
@@ -42,7 +42,6 @@ read.csv("data/Situk_sockeye_historic.csv") %>%
 read.csv("data/goal_Situk.csv") -> goal_Situk 
 
 read.csv("years_1988_on/basic_Ricker_model/output/post_data.csv") -> post_Situk_byr88_18 
-# read.csv("years_1976_on/basic_Ricker_model/output/post_data.csv") -> post_Situk_byr76_18
 
 # create brood tables
 brood_Situk <- get_brood(run_data = Situk_sockeye_run)
@@ -58,30 +57,7 @@ plot_S + labs(caption = stringr::str_wrap("Note: Escapement goal lower and
                                           escapement goal are indicated with black fill.", width = 85))
 out.file <- paste0(out.path, "/output/processed/Esc.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
-# spawner recruit plot (see table 12 in Clark et al. 2002); sigma is square root of the residual mean square error
-# 1976-2018
-# post_Situk_byr76_18 <- list("Brood years: 1976-2018" = post_Situk_byr76_18)
-# 
-# post_onlyparameters <-
-#   c(list('Brood years: 1976-1997' = c(lnalpha = 1.396244692, beta = 0.11, sigma = 0.36)),
-#     post_Situk_byr76_18)
-# 
-# goal_onlyparameters_new <-goal_Situk %>%
-#   bind_rows(data.frame(yr = 2026,
-#                        lb = 27500,
-#                        ub = 70000))
-# 
-# plot_SR <- plot_SR(post_onlyparameters,
-#         Situk_sockeye_historic,
-#         goal_dat = goal_onlyparameters_new,
-#         "Situk River Sockeye Salmon",
-#         new_finding = TRUE,
-#         multiplier = 1e-4)
-# plot_SR + geom_point(data = Situk_sockeye_76, pch =16, size =2) +
-#   labs(subtitle = paste0("Brood Years: 1976-2018"))
-# out.file <- paste0(out.path, "/output/processed/SR_76_18.png")
-# ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
-# spawner recruit plot (see table 12 in Clark et al. 2002); sigma is square root of the residual mean square error
+
 # 1988-2018
 post_Situk_byr88_18 <- list("Brood years: 1988-2018" = post_Situk_byr88_18)
 
@@ -101,7 +77,7 @@ plot_SR <- plot_SR(post_onlyparameters,
                    new_finding = TRUE,
                    multiplier = 1e-4)
 plot_SR + geom_point(data = Situk_sockeye_88, pch =16, size =2) +
-  labs(subtitle = paste0("Brood Years: 1988-2018"))
+  labs(subtitle = paste0("Brood Years: 1988-2018")) + ylim (0, 400000)
 
 out.file <- paste0(out.path, "/output/processed/SR_88_18.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
