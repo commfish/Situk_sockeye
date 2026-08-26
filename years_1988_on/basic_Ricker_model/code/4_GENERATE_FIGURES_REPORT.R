@@ -33,6 +33,7 @@ read.csv("data/Situk_sockeye.csv") %>%
   dplyr::select(yr, S, R, Y)  -> Situk_sockeye_88
 
 read.csv("data/Situk_sockeye_historic.csv") %>%
+  filter(year < 1988) %>%
   mutate(S = spawn,
          R = recruit50,
          yr = year,
@@ -75,8 +76,7 @@ plot_SR <- plot_SR(post_onlyparameters,
                    "Situk River Sockeye Salmon",
                    new_finding = TRUE,
                    multiplier = 1e-4)
-plot_SR + geom_point(data = Situk_sockeye_88, pch =16, size =2) +
-  labs(subtitle = paste0("Brood Years: 1988-2018")) + ylim(0, 500000)
+plot_SR + geom_point(data = Situk_sockeye_88, pch =16, size =2)+ theme(legend.position = "none")
 
 out.file <- paste0(out.path, "/output/processed/SR_88_18.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
