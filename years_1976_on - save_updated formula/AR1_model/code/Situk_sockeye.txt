@@ -1,0 +1,52 @@
+model {
+
+  # Observation model: lognormal recruits
+  for (y in 1:nyrs) {
+    R[y] ~ dlnorm(mu[y], Tau)
+    fit[y] <- log(S[y]) + lnalpha - rk * (beta * S[y]/10^d)
+    e[y] <- log(R[y]) - fit[y]
+  }
+
+  # Process model: AR(1) residuals and random-walk productivity
+  mu[1] <- fit[1] + ar1 * phi * e0
+  cw[1] ~ dnorm(0, tauw)
+
+  for (y in 2:nyrs) {
+    cw[y] ~ dnorm(cw[y - 1], tauw)
+    mu[y] <- fit[y] + ar1 * phi * e[y - 1]
+  }
+
+  # Priors
+  lnalpha ~ dnorm(0,1.0E-6) T(0,3)
+  #lnalpha ~ dunif(-1, 4) 
+  beta ~ dnorm(0,1.0E-6) T(0,) 
+  #beta ~ dunif(-1,5) 
+  sigma   ~ dunif(0, 2)
+  sigmaw  ~ dunif(0, 2)
+
+  # AR(1) coefficient
+  phi ~ dnorm(0, 1.0E-6) T(-1, 1)
+
+  # Initial residual
+  e0 ~ dnorm(0, 25)
+
+  # Derived precisions
+  Tau  <- 1 / (sigma * sigma)
+  tauw <- 1 / (sigmaw * sigmaw)
+
+  # Time‑varying productivity
+  for (y in 1:nyrs) {
+    lnalphai[y] <- lnalpha + cw[y]
+  }
+
+  # Mean‑adjusted ln(alpha) AR1
+  lnalpha.c <- lnalpha + 0.5 * (sigma * sigma) / (1 - phi * phi) 
+  
+  # Mean‑adjusted ln(alpha) Basic Ricker
+  #lnalpha.c <- lnalpha + 0.5 * (sigma * sigma)
+
+  # Back‑transform
+  alpha <- exp(lnalpha)
+  alpha.c <- exp(lnalpha.c)
+
+}
