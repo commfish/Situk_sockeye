@@ -49,7 +49,7 @@ read.csv(file = paste0(out.path,"/output/processed/recruit_data.csv")) -> recrui
 
 
 # analysis----
-# function for probability profiles and figures
+# function for probability profiles and figures (takes about 5 minutes to run!)
 profile(i = 5, z = 20, xa.start = 0, xa.end = 20000, lnalpha.c, lnalpha, beta1, coda) # can change i,z, xa.start, xa.end 
 read.csv(file = paste0(out.path,"/output/processed/QM.csv")) -> QM
 read.csv(file = paste0(out.path,"/output/processed/CI_median.csv")) -> CI_median
