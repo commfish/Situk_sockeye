@@ -10,6 +10,7 @@ library(scales)
 library(backports)
 devtools::install_github("commfish/fngr")
 library(fngr)
+library(car)
 # font_import() # only need run once
 # extrafont::font_import()
 windowsFonts(Times=windowsFont("TT Times New Roman"))
@@ -33,9 +34,11 @@ UMSY <- quant_lambert[quant_lambert$variable == "Umsy_lambert", "X50"]
 SMAX <- quant_lambert[quant_lambert$variable == "Smax", "X50"] 
 SEQ  <- quant_lambert[quant_lambert$variable == "Seq", "X50"]
 
-# data----
+#data
 read.csv("data/Situk_sockeye.csv") %>%
-  mutate(yield = (recruit50 - spawn)) -> spawnrecruitdat
+  mutate(year = as.numeric(year)) %>%
+  mutate(yield = (recruit50 - spawn),
+         lnRS = log(recruit50/spawn)) -> spawnrecruitdat
 read.csv("data/Situk_sockeye_historic.csv") -> spawnrecruitdat_historic
 points_all <- dplyr::bind_rows(
   spawnrecruitdat  |> dplyr::mutate(Group = "Recent"),
@@ -43,7 +46,6 @@ points_all <- dplyr::bind_rows(
 
 read.csv(file = paste0(out.path,"/output/coda.csv")) -> coda
 read.csv(file = paste0(out.path,"/output/processed/recruit_data.csv")) -> recruit
-
 
 # analysis----
 # function for probability profiles and figures
@@ -232,3 +234,28 @@ get_two_nearest_bounds(df, "oy_0.9", 0.90)
 #   theme(axis.text.x = element_text(size = 10)) 
 # out.file <- paste0(out.path, "/output/processed/productivity_changes.png")
 # ggsave(out.file, dpi = 500, height = 8, width = 9, units = "in")
+
+# Durbin-Watcon test
+# Linear regression is done in R using the lm() function, in the form lm(y~x).
+# Storing the results from lm() in lm_fit creates an object that we can extract information from.
+spawnrecruitdat
+S <- spawnrecruitdat$spawn
+R <- spawnrecruitdat$recruit50
+log_RS <-spawnrecruitdat$lnRS
+lm_fit <- lm(log_RS~S)
+summary(lm_fit)  # inspect the results
+fits <- lm_fit$fitted.values # fitted values and residuals can be extracted from lm_fit.
+resids <- lm_fit$residuals
+durbinWatsonTest(lm_fit) 
+ggplot(data = spawnrecruitdat, aes(x = year, y = resids)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  geom_point(color = "blue", size = 2) +
+  geom_line(color = "blue", alpha = 0.6) +
+  scale_x_continuous(breaks = xaxis$breaks, labels = xaxis$labels, limits = c(1976, 2020)) +
+  labs(
+    title = "Residuals vs Time",
+    x = "Year",
+    y = "Residuals") +
+  theme (axis.text.x=element_text (size=10))
+out.file <- paste0(out.path, "/output/processed/resids_time.png")
+ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
