@@ -54,7 +54,9 @@ plot_S + labs(caption = stringr::str_wrap("Note: Escapement goal lower and
                                           upper bounds are shown as solid and dashed
                                           lines, respectively. Escapements below
                                           the lower bound of the contemporaneous
-                                          escapement goal are indicated with black fill.", width = 85))
+                                          escapement goal are indicated with black fill.", width = 85)) +
+  theme(
+    plot.margin = margin(10, 10, 30, 10))  # bottom margin increased 
 out.file <- paste0(out.path, "/output/processed/Esc.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
@@ -76,11 +78,15 @@ plot_SR <- plot_SR(post_onlyparameters,
                    "Situk River Sockeye Salmon",
                    new_finding = TRUE,
                    multiplier = 1e-4)
-plot_SR + geom_point(data = Situk_sockeye_88, pch =16, size =2)+ theme(legend.position = "none")
+plot_SR + geom_point(data = Situk_sockeye_88, pch =16, size =2)+ theme(legend.position = "none") +
+  coord_cartesian(clip = "off") + # prevent clipping of labels
+  expand_limits(y = 100000)   
 
 out.file <- paste0(out.path, "/output/processed/SR_88_18.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
-       
+
+
+
 # expected yield plot
 posterior_missing <- 
   c(list('Brood years: 1976-1997' = NULL),
@@ -106,7 +112,7 @@ plot_EY + geom_point(data = Situk_sockeye_88, pch =16, size = 2) +
             linewidth = 0.5) +
   geom_vline(xintercept = 51854, linetype = "dashed",
              linewidth = 0.5) +
-  labs(subtitle = paste0("Brood Years: 1988-2018"))+ labs(caption = stringr::str_wrap(
+    theme(legend.position = "none") + labs(caption = stringr::str_wrap(
     "Note: Hollow circles and dotted lines indicate the data when the escapement goal last changed, while filled circles 
     and solid lines indicate the data collected since and the estimate of median sustained yield from all available data. 
     The vertical lines show the escapement
@@ -124,7 +130,7 @@ plot_profile(profile_missing,
 out.file <- paste0(out.path, "/output/processed/profile.png")
 ggsave(out.file, dpi = 500, height = 6, width = 8, units = "in")
 
-# spawner recruit table (this does not work)
-table_SR(post_Situk_byr88_18[2], 
-         title = "Situk River Sockeye Salmon", 
-         multiplier = 1e-4)
+# # spawner recruit table (this does not work)
+# table_SR(post_Situk_byr88_18[2], 
+#          title = "Situk River Sockeye Salmon", 
+#          multiplier = 1e-4)
